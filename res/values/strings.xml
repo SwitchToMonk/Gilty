@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gitly</string>
+    <string name="sign_in_widget">Sign in to see your stats</string>
+    <string name="heat_desc">GitHub contribution heatmap</string>
+    <string name="contrib_graph_2x1_desc">Just your GitHub contribution graph, no text (2x1)</string>
+    <string name="contrib_month_small_desc">This month’s contributions as a calendar of squares (2x2)</string>
+</resources>

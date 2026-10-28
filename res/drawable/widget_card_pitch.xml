@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inner card for the Pitch black theme: a hair above pure black so the
+     graph area still reads as a surface on AMOLED screens -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="20dp" />
+    <solid android:color="#FF070708" />
+</shape>

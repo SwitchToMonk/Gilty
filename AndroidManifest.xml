@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.onegit"
+    android:versionCode="245"
+    android:versionName="3.73">
+
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <!-- Android 9 and below need this to write into the public Downloads folder.
+         Android 10+ uses MediaStore and needs no permission at all. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
+    <!-- Android 16 "live update" promotion; ignored on older versions -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS"/>
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/AppTheme"
+        android:allowBackup="true"
+        android:usesCleartextTraffic="false">
+
+        <!-- the live card's Cancel action -->
+        <receiver
+            android:name=".CancelReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.onegit.CANCEL_TASK"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- keeps a running upload alive after the app is closed -->
+        <service
+            android:name=".UploadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
+
+        <!-- serves update APKs to the system installer as content:// URIs -->
+        <provider
+            android:name=".ApkProvider"
+            android:authorities="com.onegit.apk"
+            android:exported="false"
+            android:grantUriPermissions="true"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode|screenLayout"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="github.com"/>
+                <data android:scheme="https" android:host="www.github.com"/>
+                <data android:scheme="https" android:host="m.github.com"/>
+                <data android:scheme="https" android:host="gist.github.com"/>
+            </intent-filter>
+        </activity>
+
+
+
+
+
+
+        <activity android:name=".WidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
+
+        <receiver android:name=".ContributionMonthSmall" android:exported="true" android:label="Contributions month 2x2">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/contrib_month_small_info"/>
+        </receiver>
+
+
+        <receiver android:name=".ContributionGraph2x1" android:exported="true" android:label="Contributions graph 2x1">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/contrib_graph_2x1_info"/>
+        </receiver>
+
+
+
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

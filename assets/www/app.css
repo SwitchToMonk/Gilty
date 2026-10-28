@@ -1,0 +1,1057 @@
+/* ============ OneGit v1.2 — One UI 9: full-round, accents, auto-hide nav ============ */
+/* profile card corner button */
+.card.profile{position:relative}
+.pavalert{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:var(--text2);background:var(--chip);transition:transform .15s}
+.pavalert:active{transform:scale(.92)}
+.pavalert svg{width:20px;height:20px}
+/* productivity heatmap */
+.daybars{display:flex;gap:10px;align-items:flex-end;justify-content:space-between;padding:8px 4px 0}
+.daybar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;cursor:pointer}
+.daybar span{display:block;width:100%;max-width:34px;border-radius:8px;background:var(--accent);opacity:.55;min-height:6px}
+.daybar.cur span{opacity:1;box-shadow:0 0 12px var(--glow)}
+.daybar i{font-style:normal;font-size:10.5px;color:var(--text2)}
+.heatwrap{display:flex;gap:3px;overflow-x:auto;padding:6px 0}
+.heatcol{display:flex;flex-direction:column;gap:3px}
+.heatcell{width:11px;height:11px;border-radius:2px;background:var(--chip);flex-shrink:0}
+.heatcell.l1{background:var(--accent);opacity:.4}
+.heatcell.l2{background:var(--accent);opacity:.6}
+.heatcell.l3{background:var(--accent);opacity:.8}
+.heatcell.l4{background:var(--accent);opacity:1}
+.creditslist li{position:relative}
+.creditslist li::before{content:'';position:absolute;left:2px;top:13px;width:7px;height:7px;border-radius:4px;background:var(--accent)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+@font-face{font-family:'OneGitSans';src:url('fonts/OneGitSans.ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+[hidden]{display:none!important}
+:root{
+  --bg:#F2F2F2; --card:#FFFFFF; --text:#191919; --text2:#767676; --divider:#EFEFEF;
+  --chip:#F0F0F0; --seg:#E8E8E8;
+  --danger:#E53935; --ok:#2EA043; --purple:#8250DF;
+  --accent:#1B6EF3; --accentD:#1557C0; --glow:rgba(27,110,243,.42); --glow2:rgba(27,110,243,.14);
+}
+body.dark{
+  --bg:#161719; --card:#242527; --text:#F2F2F2; --text2:#B3B3B3; --divider:#333436;
+  --chip:#323335; --seg:#323335;
+}
+body.pitch{
+  --bg:#000000; --card:#0D0D0F; --text:#F2F2F2; --text2:#A8A8A8; --divider:#1D1D20;
+  --chip:#171719; --seg:#171719;
+}
+/* ---- accent color schemes ---- */
+html[data-accent="blue"]  { --accent:#1B6EF3; --accentD:#1557C0; --glow:rgba(27,110,243,.42); }
+html[data-accent="purple"]{ --accent:#8B5CF6; --accentD:#7C3AED; --glow:rgba(139,92,246,.45); }
+html[data-accent="green"] { --accent:#12B76A; --accentD:#0E9F5A; --glow:rgba(18,183,106,.42); }
+html[data-accent="pink"]  { --accent:#EC4899; --accentD:#DB2777; --glow:rgba(236,72,153,.45); }
+html[data-accent="amber"] { --accent:#F59E0B; --accentD:#D97706; --glow:rgba(245,158,11,.42); }
+
+html,body{height:100%}
+body{margin:0;font-family:'OneGitSans','SamsungOne','Roboto','Segoe UI',system-ui,-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;border:none;background:none;color:inherit;padding:0;cursor:pointer}
+a{color:var(--accent);text-decoration:none}
+img{display:block;max-width:100%}
+.dim{color:var(--text2)}
+body.dark .card,body.pitch .card{border:1px solid var(--divider)}
+
+/* ============ motion: keyframes ============ */
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.4) rotate(-8deg)}100%{transform:scale(1)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 8px 26px var(--glow)}50%{box-shadow:0 8px 44px var(--glow)}}
+@keyframes sheetUp{from{transform:translateY(48px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* entrance animations, staggered */
+body.entering #view > *{animation:rise .4s cubic-bezier(.22,.75,.25,1) both}
+body.entering #view > *:nth-child(1){animation-delay:.02s}
+body.entering #view > *:nth-child(2){animation-delay:.06s}
+body.entering #view > *:nth-child(3){animation-delay:.1s}
+body.entering #view > *:nth-child(4){animation-delay:.14s}
+body.entering #view > *:nth-child(5){animation-delay:.18s}
+body.entering #view > *:nth-child(6){animation-delay:.22s}
+body.entering #view > *:nth-child(n+7){animation-delay:.26s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top){animation:rise .32s cubic-bezier(.22,.75,.25,1) both}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(1){animation-delay:.03s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(2){animation-delay:.06s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(3){animation-delay:.09s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(4){animation-delay:.12s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(5){animation-delay:.15s}
+body.entering .card.list .lrow:not(.new-in):not(.slide-top):nth-child(n+6){animation-delay:.18s}
+
+/* ============ interaction feedback & glow ============ */
+.card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+.card:active{transform:scale(.98);box-shadow:0 0 24px var(--glow)}
+.lrow{transition:background .15s,box-shadow .15s}
+.lrow:active{background:var(--chip);box-shadow:inset 0 0 20px var(--glow2)}
+.navbtn{transition:transform .15s}
+.navbtn:active{transform:scale(.92)}
+.navbtn.active .nic{background:transparent}
+.segb{transition:background .15s,color .15s,box-shadow .15s,transform .15s}
+.segb:active{transform:scale(.96)}
+.segb.on{box-shadow:0 2px 14px var(--glow)}
+.switch.on{box-shadow:0 0 14px var(--glow)}
+.iconbtn{transition:transform .15s,background .15s,box-shadow .15s}
+.iconbtn:active{background:var(--chip);transform:scale(.9);box-shadow:0 0 12px var(--glow)}
+.pinbtn.pop svg{animation:pop .34s cubic-bezier(.3,1.6,.5,1)}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 26px;border-radius:24px;font-weight:600;font-size:15px;transition:transform .15s,box-shadow .2s,opacity .12s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45}
+.btn.primary{background:var(--accent);color:var(--accentText,#fff);box-shadow:0 4px 18px var(--glow)}
+.btn.primary:active{box-shadow:0 0 30px var(--glow)}
+.btn.ghost{background:var(--seg);color:var(--text)}
+.btn.danger{background:rgba(229,57,53,.12);color:var(--danger)}
+.btn.follow.on{background:var(--accent);color:var(--accentText,#fff);box-shadow:0 0 18px var(--glow)}
+.btnblock{width:100%}
+.iconbtn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0}
+.iconbtn svg{width:24px;height:24px}
+/* back buttons get the same frosted circular pill as the navigation bar */
+#backBig,#backApp{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 22px rgba(0,0,0,.14)}
+body.dark #backBig,body.dark #backApp{background:rgba(26,27,29,.76);border-color:rgba(255,255,255,.07);box-shadow:0 6px 22px rgba(0,0,0,.45)}
+body.pitch #backBig,body.pitch #backApp{background:rgba(8,8,8,.84);border-color:rgba(255,255,255,.05);box-shadow:0 6px 22px rgba(0,0,0,.9)}
+/* v2.65: with navigation glow on, the back buttons glow like the navbar */
+body.navglow #backBig,body.navglow #backApp{box-shadow:0 6px 22px rgba(0,0,0,.14),0 0 26px var(--glow)}
+body.dark.navglow #backBig,body.dark.navglow #backApp{box-shadow:0 6px 22px rgba(0,0,0,.45),0 0 26px var(--glow)}
+body.pitch.navglow #backBig,body.pitch.navglow #backApp{box-shadow:0 6px 22px rgba(0,0,0,.9),0 0 26px var(--glow)}
+
+/* ---------- login ---------- */
+#login{position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:50}
+.login-inner{max-width:430px;width:100%;margin:auto;padding:48px 22px 32px;min-height:100%;display:flex;flex-direction:column;justify-content:center}
+.logo{width:90px;height:90px;border-radius:32px;background:linear-gradient(135deg,var(--accent),var(--accentD));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:glowPulse 3s ease-in-out infinite}
+.logo svg{width:42px;height:42px;color:#fff}
+.login-title{font-size:34px;text-align:center;margin:0 0 6px;letter-spacing:-.5px}
+.login-sub{text-align:center;color:var(--text2);margin:0 0 28px;font-size:14px}
+.logincard{padding:26px}
+.fldlabel{display:block;font-size:12.5px;font-weight:600;color:var(--text2);margin:0 4px 8px}
+.fld{width:100%;border:none;background:var(--chip);border-radius:22px;padding:16px 18px;font:inherit;font-size:15px;color:var(--text);outline:none;transition:box-shadow .2s}
+.fld:focus{background:var(--seg);box-shadow:0 0 18px var(--glow)}
+.loginErr{color:var(--danger);font-size:13px;margin:10px 4px 0}
+.loginErr:empty{display:none}
+.logincard .btn{margin-top:16px}
+.lnk{display:block;text-align:center;font-size:13.5px;font-weight:600;margin-top:18px}
+.tiny{font-size:11.5px;color:var(--text2);margin:14px 4px 0;line-height:1.5;text-align:center}
+
+/* ---------- layout ---------- */
+#app{height:100vh}
+#appbar{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 8px;z-index:40;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 1px 0 var(--divider)}
+#appbar.on{opacity:1;pointer-events:auto}
+#appbarTitle{font-weight:600;font-size:16px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scroller{height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#pagehead{padding:14px 18px 12px}
+.phrow{display:flex;align-items:center;gap:10px}
+#bigTitle{font-size:34px;font-weight:700;margin:0;letter-spacing:-.5px;line-height:1.25;overflow-wrap:anywhere;flex:1;min-width:0}
+#bigSub{margin:6px 4px 0;font-size:13.5px;color:var(--text2)}
+#view{padding:6px 12px 96px}
+
+/* ---------- GPU compositing fixes: no white corner artifacts ---------- */
+#navbar{will-change:transform}
+#appbar{transform:translateZ(0)}
+.sheetcard{transform:translateZ(0)}
+/* ---------- navbar (auto-hide, glassmorphic) ---------- */
+#navbar{--navpill:var(--accent);--navptext:var(--accentText,#FFFFFF);position:fixed;bottom:16px;left:16px;right:16px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(0,0,0,.06);border-radius:999px;display:flex;padding:10px 8px;box-shadow:0 10px 34px rgba(0,0,0,.14);z-index:30;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .26s,box-shadow .3s}
+body.dark #navbar{background:rgba(26,27,29,.76);border-color:rgba(255,255,255,.07);box-shadow:0 10px 34px rgba(0,0,0,.45)}
+body.pitch #navbar{background:rgba(8,8,8,.84);border-color:rgba(255,255,255,.05);box-shadow:0 10px 34px rgba(0,0,0,.9)}
+body.navglow #navbar{box-shadow:0 10px 34px rgba(0,0,0,.14),0 0 26px var(--glow)}
+body.dark.navglow #navbar{box-shadow:0 10px 34px rgba(0,0,0,.45),0 0 26px var(--glow)}
+body.pitch.navglow #navbar{box-shadow:0 10px 34px rgba(0,0,0,.9),0 0 26px var(--glow)}
+body.navglow .navbtn.active{box-shadow:0 3px 10px rgba(0,0,0,.22),0 0 16px var(--glow)}
+#navbar.hide{transform:translateY(130px);opacity:0;pointer-events:none}
+.navbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 6px 5px;color:var(--text2);font-size:10.5px;font-weight:600;border-radius:999px;transition:background .18s,color .18s}
+.nic{display:inline-flex;align-items:center;justify-content:center;padding:5px 18px;border-radius:999px;transition:background .18s,box-shadow .18s}
+.nic svg{width:23px;height:23px}
+.navbtn.active{color:var(--navptext);background:var(--navpill);box-shadow:0 3px 10px rgba(0,0,0,.22)}
+.navbtn.active .nic{background:transparent;box-shadow:none}
+
+/* ---------- cards & lists ---------- */
+.card{background:var(--card);border-radius:32px;padding:22px;margin:0 0 14px}
+.sect{font-size:19px;font-weight:700;margin:26px 6px 13px;letter-spacing:-.2px}
+.list{padding:6px 0}
+.lrow{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--divider);cursor:pointer}
+.lrow:last-child{border-bottom:none}
+.lrow>svg{width:22px;height:22px;color:var(--text2);flex-shrink:0}
+.lmain{flex:1;min-width:0}
+.ltitle{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lsub{font-size:12.5px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbody{font-size:13px;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{text-align:center;color:var(--text2);padding:36px 24px;font-size:14px;line-height:1.6}
+.crumb{padding:14px 22px;font-size:12.5px;color:var(--text2);word-break:break-all}
+.ndot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0;visibility:hidden;box-shadow:0 0 8px var(--glow)}
+.lrow.unread .ndot{visibility:visible}
+.lrow.unread .ltitle{font-weight:700}
+.istate{width:28px;height:28px;border-radius:50%;background:rgba(46,160,67,.14);color:var(--ok);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.istate.closed{background:rgba(130,80,223,.14);color:var(--purple)}
+.istate svg{width:14px;height:14px}
+.cav{width:28px;height:28px;border-radius:50%;flex-shrink:0}
+
+/* event feed icons */
+.eicon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.eicon svg{width:17px;height:17px}
+.eicon.push{background:rgba(27,110,243,.14);color:var(--accent)}
+.eicon.star{background:rgba(255,182,46,.14);color:#D29922}
+.eicon.fork{background:rgba(130,80,223,.14);color:var(--purple)}
+.eicon.create{background:rgba(46,160,67,.14);color:var(--ok)}
+.eicon.issue{background:rgba(46,160,67,.14);color:var(--ok)}
+.eicon.pr{background:rgba(27,110,243,.14);color:var(--accent)}
+.eicon.comment{background:var(--chip);color:var(--text2)}
+.eicon.tag{background:rgba(255,167,38,.16);color:#B26A00}
+.eicon.user{background:var(--chip);color:var(--text2)}
+
+/* ---------- segmented ---------- */
+.seg{display:flex;background:var(--seg);border-radius:24px;padding:4px;margin:0 0 12px}
+.seg.compact{margin-bottom:8px}
+.segb{flex:1;min-height:40px;border-radius:20px;font-weight:600;color:var(--text2);font-size:14px;display:flex;align-items:center;justify-content:center}
+.seg.sm .segb{min-height:34px;font-size:13px;border-radius:17px}
+.segb.on{background:var(--card);color:var(--accent)}
+a.segb{color:var(--text2)}
+a.segb.on{color:var(--accent)}
+
+/* ---------- search ---------- */
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:26px;padding:0 18px;margin:4px 0 12px;min-height:54px}
+.searchbar svg{width:20px;height:20px;color:var(--text2);flex-shrink:0}
+.searchbar input{flex:1;border:none;outline:none;background:none;color:var(--text);font-size:15px;min-height:54px;min-width:0}
+
+/* people results (horizontal) */
+.peoplebar{display:flex;gap:14px;overflow-x:auto;padding:14px 22px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.peoplebar::-webkit-scrollbar{display:none}
+.person{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;width:66px}
+.person img{width:54px;height:54px;border-radius:50%;transition:transform .15s,box-shadow .15s}
+.person:active img{transform:scale(.92);box-shadow:0 0 16px var(--glow)}
+.person span{font-size:11px;color:var(--text2);max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- profile ---------- */
+.profile{text-align:center;padding:30px 20px 22px}
+.pav{width:96px;height:96px;border-radius:50%;margin:0 auto 14px}
+.pname{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.plogin{color:var(--text2);margin-top:3px;font-size:14px}
+.pbio{margin:14px auto 0;font-size:14px;max-width:340px;line-height:1.55}
+.pstats{display:flex;justify-content:center;gap:8px;margin-top:18px}
+.pstat{background:var(--chip);border-radius:22px;padding:10px 18px;min-width:88px}
+.pstat b{display:block;font-size:17px}
+.pstat span{font-size:11.5px;color:var(--text2)}
+
+
+/* ---------- repo ---------- */
+.rcrow{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.rcname{font-size:17.5px;font-weight:700;letter-spacing:-.2px;word-break:break-all}
+.rcdesc{margin:7px 0 0;color:var(--text2);font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rcmeta{margin-top:13px;font-size:12.5px;color:var(--text2);display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px}
+.rcmeta svg{width:15px;height:15px;vertical-align:-3px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:-1px;margin-right:4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 0;align-items:center}
+.chip{background:var(--chip);border-radius:13px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2)}
+.chip.ok{background:rgba(46,160,67,.14);color:var(--ok)}
+.chip.closed{background:rgba(130,80,223,.14);color:var(--purple)}
+.chip.warn{background:rgba(255,167,38,.18);color:#B26A00}
+.chip.pr{background:rgba(27,110,243,.14);color:var(--accent)}
+.chip.add{background:rgba(46,160,67,.14);color:var(--ok)}
+.chip.del{background:rgba(248,81,73,.14);color:#F85149}
+.bigstats{display:flex;margin-top:18px;border-top:1px solid var(--divider);padding-top:15px;gap:6px}
+.bstat{flex:1;text-align:center}
+.bstat b{display:block;font-size:16px}
+.bstat span{font-size:11.5px;color:var(--text2)}
+.pinbtn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;transition:transform .15s,box-shadow .15s}
+.pinbtn svg{width:20px;height:20px}
+.pinbtn:active{transform:scale(.88);box-shadow:0 0 12px var(--glow)}
+.pinbtn.pinned{color:var(--accent);filter:drop-shadow(0 0 6px var(--glow))}
+.pinbtn.pinned svg{fill:currentColor}
+.morebtn{display:block;width:100%;min-height:46px;border-radius:24px;background:var(--card);color:var(--accent);font-weight:600;font-size:14px;margin:0 0 14px;transition:box-shadow .15s,transform .15s}
+.morebtn:active{box-shadow:0 0 18px var(--glow);transform:scale(.99)}
+.metarow{display:flex;flex-direction:column;gap:16px}
+.mrow{display:flex;align-items:center;gap:12px;cursor:pointer}
+.mrow svg{width:20px;height:20px;color:var(--text2);flex-shrink:0}
+.mrow:active{opacity:.7}
+.avatars{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
+.avatars img{width:34px;height:34px;border-radius:50%;border:2px solid var(--card);box-shadow:0 1px 6px rgba(0,0,0,.25);transition:transform .15s,box-shadow .15s}
+.avatars img:active{transform:scale(.9);box-shadow:0 0 12px var(--glow)}
+
+/* ---------- issue ---------- */
+.issuehead{padding:22px}
+.ihtitle{font-size:19px;font-weight:700;line-height:1.4;margin-top:12px;letter-spacing:-.2px}
+.ihmeta{font-size:12.5px;color:var(--text2);margin-top:6px}
+.comment{padding:19px 22px}
+.crow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.crow b{font-size:13.5px}
+.crow .dim{font-size:12px;margin-left:auto}
+.reply textarea{width:100%;border:none;background:var(--chip);border-radius:22px;padding:16px;font:inherit;font-size:14px;color:var(--text);min-height:92px;resize:vertical;outline:none;transition:box-shadow .2s}
+.reply textarea:focus{box-shadow:0 0 18px var(--glow)}
+.reply .btn{margin-top:12px}
+
+/* ---------- commit ---------- */
+.commitstats{display:flex;gap:8px;margin-top:10px}
+.cstat{flex:1;text-align:center;border-radius:18px;padding:9px 0;font-size:15px;font-weight:700}
+.cstat.add{background:rgba(46,160,67,.12);color:var(--ok)}
+.cstat.del{background:rgba(248,81,73,.12);color:#F85149}
+.cstat.total{background:var(--chip);color:var(--text2)}
+.cstat.today{background:var(--accent);color:var(--accentText,#FFF)}
+.cstat span{display:block;font-size:10.5px;font-weight:500}
+.filehead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filehead svg{width:18px;height:18px;color:var(--text2)}
+.patchpre{background:var(--bg);border-radius:18px;margin-top:12px;overflow-x:hidden;font-size:11.5px;line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace}
+.pline{padding:0 10px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;min-height:1.4em;color:var(--text)}
+.pline.add{color:#4CC35E;background:rgba(63,185,80,.14)}
+.pline.del{color:#FF6B60;background:rgba(248,81,73,.12)}
+.pline.hh{color:var(--text2);background:var(--chip)}
+.relbody{font-size:13px;color:var(--text2);white-space:pre-line;margin-top:10px;max-height:280px;overflow:auto;line-height:1.6}
+
+/* ---------- settings ---------- */
+.setrow{display:flex;align-items:center;gap:14px;padding:2px 0}
+.accentrow{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap}
+.accentdot{width:44px;height:44px;border-radius:50%;border:3px solid transparent;transition:transform .15s,box-shadow .15s,border-color .15s}
+.accentdot:active{transform:scale(.88)}
+.accentdot.on{border-color:var(--text);transform:scale(1.1);box-shadow:0 0 16px var(--glow)}
+.switch{width:52px;height:30px;border-radius:15px;background:var(--seg);position:relative;transition:background .2s,box-shadow .2s;flex-shrink:0}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.on{background:var(--accent)}
+.switch.on::after{left:25px}
+.btncol{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.syncstat{font-size:12px;color:var(--text2);margin-top:14px;text-align:center}
+.about{text-align:center;font-size:11.5px;color:var(--text2);padding:22px 10px 6px;line-height:1.6}
+
+/* ---------- markdown ---------- */
+.md{font-size:14.5px;line-height:1.65;overflow-wrap:anywhere}
+.md h1,.md h2,.md h3,.md h4{letter-spacing:-.2px;margin:1.1em 0 .45em;line-height:1.3}
+.md h1{font-size:22px;border-bottom:1px solid var(--divider);padding-bottom:6px}
+.md h2{font-size:18px;border-bottom:1px solid var(--divider);padding-bottom:5px}
+.md h3{font-size:16px}
+.md p{margin:.6em 0}
+.md ul,.md ol{padding-left:1.4em;margin:.6em 0}
+.md li{margin:.25em 0}
+.md pre{background:var(--bg);padding:14px 16px;border-radius:18px;overflow-x:auto;font-size:12.5px;line-height:1.5;margin:.8em 0}
+.md code{background:var(--chip);border-radius:7px;padding:1px 6px;font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font-size:inherit}
+.md img{border-radius:14px;margin:8px 0;max-width:100%;height:auto}
+.md video{width:100%;max-height:70vh;border-radius:14px;background:#000;margin:8px 0}
+.md details{margin:10px 0;border:1px solid var(--divider);border-radius:14px;padding:4px 14px}
+.md summary{cursor:pointer;font-weight:600;padding:8px 0;color:var(--text)}
+.md summary::marker{color:var(--accent)}
+.md table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:.8em 0}
+.md th,.md td{border:1px solid var(--divider);padding:6px 10px;font-size:13px}
+.md blockquote{margin:.8em 0;padding:2px 14px;border-left:3px solid var(--divider);color:var(--text2)}
+.md hr{border:none;border-top:1px solid var(--divider)}
+
+/* ---------- sheet ---------- */
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:flex;align-items:flex-end}
+.sheetcard{background:var(--card);width:100%;border-radius:36px 36px 0 0;padding:14px 16px 30px;max-height:86vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;animation:sheetUp .32s cubic-bezier(.2,.8,.25,1)}
+/* v2.66: while a sheet is open the page behind it cannot scroll */
+body.sheetopen #scroller{overflow:hidden}
+.sheethead{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 8px;gap:10px}
+.sheethead b{font-size:15px;word-break:break-all}
+.filepre{background:transparent;padding:0;border-radius:0;font-size:12.5px;line-height:1.6;
+  overflow:visible;max-height:none;white-space:pre;word-break:normal;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--text)}
+
+/* ---------- toast & spinner ---------- */
+#toasts{position:fixed;bottom:100px;left:0;right:0;display:flex;flex-direction:column;align-items:center;z-index:80;pointer-events:none}
+.toast{background:#2E2E2E;color:#fff;padding:11px 22px;border-radius:24px;font-size:13.5px;opacity:0;transform:translateY(8px);transition:all .25s;margin-top:8px;max-width:88%;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.3),0 0 16px var(--glow)}
+body.dark .toast,body.pitch .toast{background:#E8E8E8;color:#222}
+.toast.show{opacity:1;transform:none}
+.spinwrap{display:flex;justify-content:center;padding:44px 0}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--seg);border-top-color:var(--accent);animation:spin .8s linear infinite;filter:drop-shadow(0 0 6px var(--glow))}
+.spinwrap.sm{padding:20px 0}
+.spinwrap.sm .spinner{width:24px;height:24px}
+
+/* ============ v1.3: repo actions, languages, quick links, gists ============ */
+/* The button row on the repo page (Star / Watch / Fork / Productivity) could not
+   shrink: the buttons were flex:1 with the default min-width:auto, so the row
+   stuck out past the screen and the whole page could be dragged sideways, which
+   left it cut off on the left with a dead strip on the right. The row now
+   scrolls on its own and the scroller never moves horizontally. */
+.actionrow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.actionrow::-webkit-scrollbar{display:none}
+.actionrow .btn{flex:1 0 auto;min-width:0;min-height:42px;padding:0 6px;font-size:13px;border-radius:21px;gap:6px}
+.actionrow .btn svg{width:16px;height:16px;flex-shrink:0}
+.actionrow .btn.on{background:var(--accent);color:var(--accentText,#fff);box-shadow:0 0 16px var(--glow)}
+.actionrow .btn.on svg{fill:currentColor}
+.langbar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px}
+.langbar span{display:block;min-width:2px}
+.lgdrow{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}
+.lgd{font-size:12.5px}
+.quicklinks{display:flex;gap:10px;overflow:hidden}
+.quicklinks .btn{flex:1;min-height:42px;min-width:0;padding:0 8px;font-size:13px;border-radius:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.linkrow{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.btn.sm{min-height:38px;padding:0 18px;font-size:13px;border-radius:19px}
+.pstat{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.pstat:active{transform:scale(.95);box-shadow:0 0 14px var(--glow)}
+.replyta{width:100%;border:none;background:var(--chip);border-radius:22px;padding:16px;font:inherit;font-size:14px;color:var(--text);min-height:150px;resize:vertical;outline:none;transition:box-shadow .2s}
+.replyta:focus{box-shadow:0 0 18px var(--glow)}
+
+/* ============ v1.4: release assets, clone sheet ============ */
+.assetlist{margin-top:14px;border-top:1px solid var(--divider)}
+.assetlist .lrow{padding:12px 4px}
+.assetlist .lrow>svg{color:var(--accent)}
+.clonebar{display:flex;align-items:center;gap:8px}
+.clonebar .fld{flex:1;min-width:0;font-size:13px;color:var(--text2)}
+.clonebar .iconbtn{width:44px;height:44px;background:var(--chip);color:var(--text)}
+.clonebar .iconbtn:active{box-shadow:0 0 14px var(--glow)}
+
+/* ============ v1.7: more accents, glow toggle, dynamic color ============ */
+html[data-accent="teal"]   { --accent:#14B8A6; --accentD:#0D9488; --glow:rgba(20,184,166,.42); --glow2:rgba(20,184,166,.14); }
+html[data-accent="red"]    { --accent:#EF4444; --accentD:#DC2626; --glow:rgba(239,68,68,.42); --glow2:rgba(239,68,68,.14); }
+html[data-accent="indigo"] { --accent:#6366F1; --accentD:#4F46E5; --glow:rgba(99,102,241,.45); --glow2:rgba(99,102,241,.16); }
+
+/* glow toggle — kill every decorative glow while keeping structural shadows */
+html[data-glow="off"]{
+  --glow:transparent !important;
+  --glow2:transparent !important;
+}
+html[data-glow="off"] .logo{animation:none}
+html[data-glow="off"] .pinbtn.pinned{filter:none}
+html[data-glow="off"] .spinner{filter:none}
+html[data-glow="off"] .card:active{box-shadow:none}
+
+/* dynamic (system) accent dot */
+.accentdot.dyn{
+  background:conic-gradient(#F59E0B,#EC4899,#8B5CF6,#6366F1,#14B8A6,#12B76A,#F59E0B);
+}
+
+/* ============ v1.8: custom color picker, font import ============ */
+.colorrow{display:flex;gap:10px;align-items:center;margin-top:14px}
+.colorrow input[type=color]{width:54px;height:46px;border:none;border-radius:14px;background:var(--chip);padding:4px;flex-shrink:0}
+.colorrow .fld{flex:1;min-width:0;min-height:46px;text-transform:uppercase;font-size:14px}
+.colorrow .btn{min-height:46px;min-width:84px;padding:0 18px;flex-shrink:0}
+.accentdot.customdot{border:2px dashed var(--text2)}
+.accentdot.customdot.on{border-color:var(--text)}
+.fontrow{display:flex;gap:10px;margin-top:14px}
+.fontrow label{cursor:pointer;flex:1}
+.fontprev{margin-top:14px;font-size:14px;color:var(--text);background:var(--chip);border-radius:16px;padding:14px;line-height:1.6}
+/* ---------- update popup card ---------- */
+#updCard{position:fixed;top:68px;left:16px;right:16px;z-index:45;background:var(--card);border:1px solid var(--divider);border-radius:22px;padding:14px 16px;box-shadow:0 14px 44px rgba(0,0,0,.30);animation:updin .32s cubic-bezier(.4,0,.2,1)}
+body.dark #updCard,body.pitch #updCard{box-shadow:0 14px 44px rgba(0,0,0,.6)}
+.updrow{display:flex;align-items:center;gap:10px}
+.updrow .lmain{flex:1;min-width:0}
+.updrow .iconbtn{flex-shrink:0;font-size:15px}
+@keyframes updin{from{transform:translateY(-18px);opacity:0}to{transform:none;opacity:1}}
+/* ---------- upload progress card ---------- */
+#upProgCard{position:fixed;right:18px;bottom:104px;top:auto;left:auto;width:62px;height:62px;z-index:46;background:var(--card);border:1px solid var(--divider);border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.34);animation:updin .32s cubic-bezier(.4,0,.2,1);cursor:pointer;transition:transform .15s}
+#upProgCard:active{transform:scale(.93)}
+#upProgRing{width:48px;height:48px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--accent) calc(var(--p,0) * 1%), var(--chip) 0)}
+#upProgRing::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--card)}
+#upProgPct{position:relative;font-size:12px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+body.dark #upProgCard,body.pitch #upProgCard{box-shadow:0 14px 44px rgba(0,0,0,.6)}
+.upbar{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:10px}
+.upbar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .25s}
+.filehead[data-go]{cursor:pointer}
+
+/* ================= v2.78: PRs, actions, security, insights, a11y ================= */
+.seg.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.seg.tabs::-webkit-scrollbar{display:none}
+.seg.tabs .segb{flex:1 0 auto;min-width:88px;padding:0 14px;white-space:nowrap}
+.istate.merged{background:rgba(139,92,246,.15);color:#8B5CF6}
+.runstate{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.runstate.ok{background:rgba(18,183,106,.15);color:#12B76A}
+.runstate.bad{background:rgba(239,68,68,.15);color:#EF4444}
+.runstate.run{background:rgba(245,158,11,.15);color:#F59E0B}
+.runstate.mute{background:var(--seg);color:var(--text2)}
+.runstate svg{width:16px;height:16px}
+.steps{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.step{display:flex;gap:8px;font-size:12.5px;color:var(--text2)}
+.wkchart{display:flex;align-items:flex-end;gap:2px;height:64px;margin-top:14px}
+.wkbar{flex:1;background:var(--accent);border-radius:2px;min-height:2px;opacity:.85}
+.cbar{height:6px;border-radius:3px;background:var(--seg);overflow:hidden;margin-top:6px;min-width:70px}
+.cbar span{display:block;height:100%;background:var(--accent);border-radius:3px}
+body.reducemotion *{animation:none!important;transition:none!important}
+body.showunderline .md a, body.showunderline .card.md a{text-decoration:underline}
+
+/* v2.79: wrapping secondary text for messages inside sheets */
+.lsubwrap{white-space:normal!important;overflow:visible!important;text-overflow:initial!important;overflow-wrap:anywhere;line-height:1.55}
+
+/* v2.84: fallback link shown when a README image cannot be loaded at all */
+.imgfallback{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;margin:4px 0;border-radius:14px;background:var(--seg);color:var(--accent);font-size:13px;font-weight:600;text-decoration:none;overflow-wrap:anywhere}
+
+/* v2.92: GitHub's Activity overview radar chart */
+.radar{width:100%;height:auto;display:block;max-height:260px}
+.radaraxis{stroke:var(--divider);stroke-width:1}
+.radararea{fill:rgba(18,183,106,.18);stroke:#12B76A;stroke-width:2;stroke-linejoin:round}
+.radarlabel{fill:var(--text2);font-size:11px;font-weight:600}
+.radarlabel.end{text-anchor:end}
+.radarlabel.mid{text-anchor:middle}
+
+/* ================= v3.02: desktop & laptop layout =================
+   Nothing below 760px changes, so the phone layout is untouched. Wider
+   screens get a centred content column, dialogs instead of bottom sheets,
+   a permanent navigation rail, hover feedback and finer scrollbars. */
+
+/* ---------- tablet / small laptop ---------- */
+@media (min-width: 760px) {
+  #pagehead { max-width: 920px; margin: 0 auto; padding: 22px 26px 14px; }
+  #view { max-width: 920px; margin: 0 auto; padding: 10px 26px 120px; }
+  #appbar { padding: 0 26px; }
+  #appbarTitle { flex: 1; }
+  #bigTitle { font-size: 36px; }
+  .card { padding: 24px; }
+  .searchbar { max-width: 920px; margin: 4px auto 12px; }
+  .heatwrap { justify-content: center; }
+  .heatcell { width: 13px; height: 13px; }
+  .seg { max-width: 920px; }
+  .bigstats { gap: 14px; }
+  .pstats { gap: 12px; }
+  /* bottom sheets become centred dialogs */
+  #sheet { align-items: center; justify-content: center; padding: 28px; }
+  .sheetcard { max-width: 580px; border-radius: 32px; max-height: 82vh; padding: 20px 22px 26px; }
+  .sheethead { padding: 4px 6px 14px; }
+  .sheethead b { font-size: 16px; }
+  /* nothing: the numbered block must never cap its own height */
+  #toasts { bottom: 40px; }
+}
+
+/* ---------- desktop / laptop ---------- */
+@media (min-width: 1080px) {
+  /* the floating pill becomes a permanent left rail */
+  #navbar {
+    top: 0; bottom: 0; left: 0; right: auto; width: 100px;
+    flex-direction: column; justify-content: center; gap: 8px;
+    padding: 16px 12px; border-radius: 0 30px 30px 0;
+    background: var(--card);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    border: none; border-right: 1px solid var(--divider);
+    box-shadow: none;
+  }
+  #navbar.hide { transform: none; opacity: 1; pointer-events: auto; }
+  .navbtn { flex: 0 0 auto; width: 76px; min-height: 64px; border-radius: 20px; font-size: 11px; }
+  .navbtn.active { box-shadow: 0 6px 18px var(--glow); }
+  #scroller { padding-left: 100px; }
+  #appbar { padding-left: 126px; }
+  #pagehead, #view { max-width: 1140px; }
+  #view { padding-bottom: 56px; }
+  #toasts { bottom: 28px; }
+  /* repository cards lay out two-up */
+  .repogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .repogrid .card { margin: 0; }
+  .bigstats { flex-wrap: wrap; }
+  .bstat { min-width: 130px; }
+  .radar { max-height: 320px; }
+  .daybars { max-width: 720px; margin: 0 auto; }
+}
+
+@media (min-width: 1400px) {
+  #pagehead, #view { max-width: 1280px; }
+  .repogrid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ---------- mouse / trackpad ---------- */
+@media (hover: hover) and (pointer: fine) {
+  button, a, .lrow, .card[data-go], .person, .navbtn { cursor: pointer; }
+  .card:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(0,0,0,.10); }
+  body.dark .card:hover, body.pitch .card:hover { box-shadow: 0 8px 26px rgba(0,0,0,.5); }
+  .lrow:hover { background: var(--chip); }
+  .btn:hover { box-shadow: 0 6px 22px var(--glow); }
+  .btn.ghost:hover, .btn.danger:hover { background: var(--chip); }
+  .iconbtn:hover { background: var(--chip); }
+  .segb:hover { color: var(--text); }
+  .navbtn:hover { background: var(--chip); color: var(--text); }
+  .accentdot:hover { transform: scale(1.06); }
+  .pinbtn:hover { color: var(--accent); }
+  .morebtn:hover { box-shadow: 0 6px 22px var(--glow); }
+  .person:hover img { transform: scale(1.04); box-shadow: 0 0 16px var(--glow); }
+  #scroller { scrollbar-width: thin; scrollbar-color: var(--divider) transparent; }
+  #scroller::-webkit-scrollbar { width: 10px; }
+  #scroller::-webkit-scrollbar-track { background: transparent; }
+  #scroller::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 8px; border: 3px solid var(--bg); }
+  #scroller::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+  .sheetcard { scrollbar-width: thin; }
+  .sheetcard::-webkit-scrollbar { width: 8px; }
+  .sheetcard::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 8px; }
+}
+
+/* v3.05: profile actions sit on one row (was three stacked lines) */
+.btnrow{display:flex;gap:8px;margin-top:18px}
+.btnrow .btn{flex:1;min-width:0;padding:0 10px;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v3.08: account switcher on the profile card - the next account's avatar;
+   tap to switch, long press (3+ accounts) to choose. No ring, no glow. */
+.pacct{position:absolute;top:16px;left:16px;width:40px;height:40px;border-radius:50%;padding:0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--chip);color:var(--text2);font-weight:700;font-size:14px;transition:transform .15s;z-index:2}
+.pacct img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.pacct:active{transform:scale(.92)}
+
+/* v3.09: nudge the progress button above the desktop nav rail */
+@media (min-width:1080px){#upProgCard{right:26px;bottom:30px}}
+
+/* v3.10: labels, assignees, reactions, checks, workflow dispatch */
+.lbl{display:inline-block;border-radius:13px;padding:4px 11px;font-size:12px;font-weight:600}
+.assignrow{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.reacts{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:0 4px}
+.react{display:inline-flex;align-items:center;gap:5px;background:var(--chip);border:1px solid transparent;border-radius:15px;padding:5px 11px;font-size:14px;line-height:1;color:var(--text2);transition:transform .12s,border-color .12s}
+.react b{font-size:11.5px;font-weight:700}
+.react.on{border-color:var(--accent);color:var(--accent)}
+.react:active{transform:scale(.94)}
+.lblpick{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.lblpickb{border:1px solid var(--divider);background:var(--chip);color:var(--text2);border-radius:14px;padding:6px 13px;font-size:12.5px;font-weight:600}
+.lblpickb.on{background:var(--lc);border-color:var(--lc);color:#fff}
+.lblpickb.on::after{content:' \2713'}
+.ck{display:flex;align-items:center;color:var(--accent)}
+.ck svg{width:18px;height:18px}
+.triage{margin-top:12px}
+
+/* v3.11: scroll-to-top arrow, shown near the bottom of a README */
+#toTop{position:fixed;right:18px;bottom:104px;z-index:44;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--divider);color:var(--text2);box-shadow:0 8px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s,bottom .2s}
+#toTop.on{opacity:1;pointer-events:auto;transform:none}
+#toTop:active{transform:scale(.92)}
+#toTop svg{width:20px;height:20px}
+body.dark #toTop,body.pitch #toTop{box-shadow:0 8px 24px rgba(0,0,0,.6)}
+@media (min-width:1080px){#toTop{right:26px;bottom:30px}}
+
+/* v3.12: a row per picked file on the release sheet, with rename + remove */
+.filerow{display:flex;align-items:center;gap:8px;padding:8px 0}
+
+/* v3.14: the consent screen, and the SSH private-key box */
+.consent{text-align:center}
+.cmark{width:64px;height:64px;border-radius:16px;margin:6px auto 12px;display:flex;align-items:center;justify-content:center;background:var(--chip);color:var(--text);font-size:26px;font-weight:700}
+.ctitle{font-size:22px;margin:0 0 6px}
+.cby{font-size:13px;color:var(--text2);margin-bottom:14px}
+.cwants{font-size:14.5px;margin:0 0 16px}
+.clist{text-align:left;border:1px solid var(--divider);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.cgroup{border-bottom:1px solid var(--divider);padding:12px 14px}
+.cgroup:last-child{border-bottom:none}
+.cglabel{font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.crow3{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:4px 0}
+.crow3 b{color:var(--text2);font-weight:600;white-space:nowrap}
+.credirect{font-size:12.5px;color:var(--text2);margin-bottom:10px;word-break:break-all}
+.credirect span{color:var(--text)}
+.cnote{font-size:12.5px;color:var(--text2);line-height:1.5;margin:0 0 16px}
+.cbtns{display:flex;gap:10px}
+.cbtns .btn{flex:1}
+.keybox{width:100%;min-height:150px;background:var(--chip);border:1px solid var(--divider);border-radius:14px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--text);resize:vertical;word-break:break-all}
+
+/* v3.15: personal access token builder */
+.permrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider);flex-wrap:wrap}
+.permrow:last-child{border-bottom:none}
+.permrow .lmain{flex:1;min-width:130px}
+.seg.xs{display:flex;gap:6px;flex-shrink:0}
+.seg.xs .segb{padding:6px 12px;font-size:12px}
+.tkprev{font-size:11.5px;color:var(--text2);word-break:break-all;background:var(--chip);border-radius:12px;padding:10px 12px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5}
+
+/* =====================================================================
+   Compact mode — tighter, one-hand friendly layout.
+   Everything shrinks a notch so more fits on screen and the controls
+   stay inside thumb reach; the bottom bar keeps its place.
+   ===================================================================== */
+body.compact #view{padding:4px 10px 88px}
+body.compact .card{padding:14px;border-radius:22px;margin:0 0 9px}
+body.compact .sect{font-size:15.5px;margin:16px 6px 8px}
+body.compact .lrow{gap:11px;padding:10px 14px}
+body.compact .ltitle{font-size:13.5px}
+body.compact .lsub{font-size:11.5px;margin-top:2px}
+body.compact .btn{min-height:42px;padding:0 18px;font-size:13.5px;border-radius:21px}
+body.compact .fld{padding:12px 14px;font-size:14px;border-radius:18px}
+body.compact .replyta{padding:12px;border-radius:18px}
+body.compact .segb{min-height:34px;font-size:13px;border-radius:17px}
+body.compact #appbar{height:48px}
+body.compact #pagehead{padding:10px 14px 8px}
+body.compact #navbar{padding:7px 7px;bottom:10px;left:10px;right:10px}
+body.compact .navbtn{font-size:10.5px}
+body.compact .nic{padding:5px 14px}
+body.compact .pav{width:64px;height:64px;margin-bottom:8px}
+body.compact .bstat b{font-size:15px}
+body.compact .sheetcard{padding:12px 14px 22px;border-radius:28px 28px 0 0}
+body.compact .heatwrap{gap:2px}
+body.compact .comment{padding:14px}
+body.compact .crumb{padding:10px 14px}
+body.compact .pstat{padding:8px 14px;min-width:78px}
+
+/* ---------- notifications: richer list ---------- */
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chiprow::-webkit-scrollbar{display:none}
+.chiprow .lblpickb{white-space:nowrap;flex-shrink:0}
+.ntbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 4px 10px;font-size:12.5px;color:var(--text2)}
+.ntbar-acts{display:flex;gap:8px}
+.ntrepo{font-size:12px;font-weight:700;color:var(--text2);margin:14px 6px 6px;letter-spacing:.3px;word-break:break-all}
+.ntchip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10.5px;font-weight:700;background:var(--seg);color:var(--text2)}
+.ntchip.pr{background:rgba(139,92,246,.18);color:#8B5CF6}
+.ntchip.iss{background:rgba(27,110,243,.18);color:#1B6EF3}
+.ntchip.rel{background:rgba(18,183,106,.18);color:#12B76A}
+.ntchip.sec{background:rgba(239,68,68,.18);color:#EF4444}
+.ntchip.ci{background:rgba(245,158,11,.20);color:#B45309}
+.ntmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ntacts{display:flex;gap:8px;margin-top:8px}
+.ntacts .btn{min-height:34px;padding:0 14px;font-size:12.5px}
+
+/* ---------- repository productivity: weekly bars + contributor bars ---------- */
+.weekbars{display:flex;align-items:flex-end;gap:2px;height:120px;padding:4px 0}
+.wkbar{flex:1;min-width:2px;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85}
+.bar{height:6px;border-radius:999px;background:var(--seg);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:999px}
+
+/* =====================================================================
+   "New" arrival animation
+   A refresh keeps the list on screen and instead animates the rows that
+   are genuinely new - a slide in, a brief accent tint and a bar down the
+   left edge - so you can see what arrived. No page-blanking spinner.
+   (Specificity is raised to beat .card.list .lrow's own entrance.)
+   ===================================================================== */
+@keyframes newIn  { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes newTint{ 0%, 26% { background: var(--glow); } 100% { background: transparent; } }
+@keyframes newBar { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+
+.lrow.new-in,
+.card.list .lrow.new-in {
+  position: relative;
+  /* !important: the app staggers list rows with animation-delay, which would
+     otherwise make the "new" glow start late */
+  animation: newIn .55s cubic-bezier(.2, .8, .25, 1) both,
+             newTint 2.4s ease-out both;
+  animation-delay: 0s !important;
+}
+.lrow.new-in::before,
+.card.list .lrow.new-in::before {
+  content: '';
+  position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 3px; background: var(--accent);
+  animation: newBar 2.4s ease-out both;
+}
+html[data-glow="off"] .lrow.new-in,
+html[data-glow="off"] .card.list .lrow.new-in {
+  animation: newIn .55s cubic-bezier(.2, .8, .25, 1) both;
+}
+
+
+/* =====================================================================
+   Sliding insert
+   When new commits or activity arrive they are pushed in at the top and
+   slide down over the rows already on screen, shoving them down - instead
+   of the whole list being redrawn. The class is removed when the
+   animation ends, so nothing is left clipped.
+   ===================================================================== */
+@keyframes slideTop {
+  from { opacity: 0; transform: translateY(-100%); }
+  to   { opacity: 1; transform: none; }
+}
+/* The row keeps its FULL height and slides down into place from behind the
+   card's top edge. (Animating its own height clipped the row mid-slide, which
+   is what made the text look cut in half.) */
+.card.list .lrow.slide-top,
+.lrow.slide-top {
+  animation: slideTop .5s cubic-bezier(.2, .8, .25, 1) both;
+  animation-delay: 0s !important;
+}
+.card.list.slide-anim { overflow: hidden; }
+
+/* =====================================================================
+   Downloads page — share ring, horizontal bar charts, 14-day trend
+   ===================================================================== */
+.dlhero{background:linear-gradient(135deg,var(--accent),var(--accentD));border:none}
+/* the hero sits on the accent colour, so its text uses the accent's own
+   contrast colour - near-black on a light accent, white on a dark one - instead
+   of always white, which vanished on light accents. */
+.dlhero .ltitle,.dlhero .lsub{color:var(--accentText,#fff);opacity:1}
+
+.hbar{padding:11px 0;border-bottom:1px solid var(--divider);cursor:pointer;transition:background .15s}
+.hbar:last-child{border-bottom:none}
+.hbar:active{background:var(--chip)}
+.hbar-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.hbar-lbl{font-weight:600;font-size:13.5px;word-break:break-all}
+.hbar-val{font-weight:700;font-size:13px;color:var(--text2);flex-shrink:0}
+.hbar-track{height:8px;border-radius:999px;background:var(--seg);overflow:hidden;margin-top:7px}
+.hbar-track span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accentD))}
+.hbar-sub{font-size:11.5px;color:var(--text2);margin-top:5px;word-break:break-all}
+
+.donutwrap{position:relative;width:152px;height:152px;margin:8px auto 16px}
+.donut{width:100%;height:100%;display:block}
+.donutcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.donutcenter b{font-size:19px;font-weight:800}
+.donutcenter span{font-size:10.5px;color:var(--text2);margin-top:2px}
+.donutlegend{display:flex;flex-wrap:wrap;gap:9px 16px;justify-content:center}
+.donutlegend span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2)}
+.donutlegend i{width:9px;height:9px;border-radius:3px;display:inline-block;flex-shrink:0}
+
+.trendwrap{display:flex;align-items:flex-end;gap:3px;height:118px}
+.trendcol{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.trendbar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--accent),var(--accentD));min-height:4px}
+.trendcol i{font-style:normal;font-size:9px;color:var(--text2);margin-top:5px}
+
+/* =====================================================================
+   Traffic page — interactive line chart
+   ===================================================================== */
+.tlwrap{position:relative}
+.tlchart{width:100%;height:auto;display:block;overflow:visible}
+.tlline{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.tldot{fill:var(--card);stroke:var(--accent);stroke-width:2;transition:r .15s}
+.tldot.on{fill:var(--accent)}
+.tlhit{fill:transparent;cursor:pointer}
+.tl-x{display:flex;font-size:9.5px;color:var(--text2);margin-top:4px}
+.tl-x span{flex:1;text-align:center;white-space:nowrap}
+.tl-x span:first-child{text-align:left}
+.tl-x span:last-child{text-align:right}
+.tl-hint{font-size:10.5px;color:var(--text2);text-align:center;margin-top:8px;opacity:.75}
+.tl-tip{position:absolute;transform:translate(-50%,-130%);background:var(--card);border:1px solid var(--divider);
+        border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:600;
+        box-shadow:0 8px 22px rgba(0,0,0,.22);white-space:nowrap;pointer-events:none;z-index:5}
+.trendbar{cursor:pointer}
+
+
+/* =====================================================================
+   Auto-adjust to the device's aspect ratio (Settings → Appearance)
+   body.autoadjust + one of ar-tall / ar-mid / ar-wide / ar-land
+   ===================================================================== */
+body.autoadjust.ar-tall .card{padding:24px;margin-bottom:16px}
+body.autoadjust.ar-tall .sect{margin:28px 6px 14px}
+body.autoadjust.ar-tall #view{padding-bottom:126px}
+body.autoadjust.ar-tall #navbar{bottom:20px;padding:12px 8px}
+body.autoadjust.ar-tall .btn{min-height:50px}
+body.autoadjust.ar-tall .lrow{padding:16px 22px}
+body.autoadjust.ar-tall .bstat b{font-size:17px}
+
+body.autoadjust.ar-wide .card{padding:18px;margin-bottom:11px}
+body.autoadjust.ar-wide .sect{margin:20px 6px 10px}
+body.autoadjust.ar-wide #view{padding:6px 10px 90px}
+body.autoadjust.ar-wide #navbar{bottom:12px}
+body.autoadjust.ar-wide .btn{min-height:44px}
+body.autoadjust.ar-wide .lrow{padding:12px 20px}
+
+body.autoadjust.ar-land #view{padding:6px 16px 88px}
+body.autoadjust.ar-land .card{padding:16px;margin-bottom:10px}
+body.autoadjust.ar-land .sect{margin:16px 6px 8px}
+body.autoadjust.ar-land #navbar{bottom:8px}
+body.autoadjust.ar-land .bigstats{flex-wrap:wrap}
+body.autoadjust.ar-land .bstat{min-width:112px}
+body.autoadjust.ar-land #pagehead{padding:10px 18px 8px}
+
+
+/* =====================================================================
+   Refresh animation  (replaces the old page "rise" on refresh)
+   A refresh must not look like the page reloading. The old behaviour
+   replayed the entrance animation on everything already on screen - and
+   re-assembling a list restarted it on every reused row. Now a refresh
+   plays one soft settle plus a single light sweep down the screen, and
+   content that was already there does not move at all.
+   ===================================================================== */
+@keyframes softIn{ from{ opacity:.55; transform:translateY(4px) } to{ opacity:1; transform:none } }
+@keyframes refreshSweep{
+  0%  { transform:translateY(-45vh); opacity:0 }
+  16% { opacity:.16 }
+  100%{ transform:translateY(calc(100vh - 56px)); opacity:0 }
+}
+/* the light sweep travels down the visible area, below the 56px app bar */
+body.refreshing #scroller::after{
+  content:''; position:fixed; left:0; right:0; top:56px; height:34vh;
+  pointer-events:none; z-index:39; opacity:0;
+  background:linear-gradient(180deg,transparent,var(--accent),transparent);
+  animation:refreshSweep .8s cubic-bezier(.3,.7,.3,1) both;
+}
+/* refreshed content settles in gently instead of rising from the bottom */
+body.refreshing #view>*{
+  animation:softIn .42s cubic-bezier(.22,.75,.25,1) both;
+  animation-delay:0s !important;
+}
+/* rows already on screen must not replay their entrance when the list is
+   re-assembled - only genuinely new rows (new-in / slide-top) animate */
+body.refreshing .card.list .lrow:not(.new-in):not(.slide-top){
+  animation:none !important;
+}
+/* Once content has been through a refresh it must never replay its entrance.
+   Without this, dropping the refresh state a moment later let the page
+   entrance animation fire again on everything - which looked like the page
+   refreshing itself a second after the new items appeared. */
+#view > .settled{ animation:none !important }
+.card.list .lrow.settled:not(.new-in):not(.slide-top){ animation:none !important }
+
+/* with glow switched off the sweep is dropped too; the settle still plays */
+html[data-glow="off"] body.refreshing #scroller::after{ display:none }
+@media (prefers-reduced-motion: reduce){ body.refreshing #scroller::after{ display:none } }
+
+/* =====================================================================
+   Contribution-style heat components (Downloads tab)
+   The same squares as the contribution graph, reused for clones, views and
+   release activity. Deliberately no glow - these are plain tinted squares.
+   ===================================================================== */
+.heatmonths{display:flex;gap:3px;padding:0 0 5px;overflow:hidden}
+.heatmonth{width:11px;flex-shrink:0;font-size:9.5px;line-height:1;color:var(--text2);white-space:nowrap;overflow:visible}
+.heatcell.future{background:transparent}
+.heatlegend{display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:10px;font-size:10px;color:var(--text2)}
+.heatlegend span{margin:0 4px}
+.heatlegend .heatcell{width:10px;height:10px}
+
+.heatrow{display:flex;gap:6px;align-items:flex-end;padding-top:4px}
+.heatday{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.heatday .heatcell{width:100%;border-radius:8px;transition:transform .15s}
+.heatday .heatcell:active{transform:scale(.94)}
+.heatday b{font-size:10px;font-weight:600;color:var(--text2)}
+.heatday span{font-size:11.5px;font-weight:700}
+
+.heatgrid{display:flex;flex-wrap:wrap;gap:8px;padding-top:4px}
+.heatrel{position:relative;flex:1 1 30%;min-width:92px;border-radius:14px;padding:11px 12px;background:var(--chip);overflow:hidden;cursor:pointer;transition:transform .15s}
+.heatrel::before{content:'';position:absolute;inset:0;background:var(--accent);opacity:0;pointer-events:none}
+.heatrel.l1::before{opacity:.12}
+.heatrel.l2::before{opacity:.24}
+.heatrel.l3::before{opacity:.38}
+.heatrel.l4::before{opacity:.55}
+.heatrel b,.heatrel span,.heatrel i{position:relative;display:block}
+.heatrel b{font-size:11.5px;font-weight:600;line-height:1.3;word-break:break-all}
+.heatrel span{font-size:16px;font-weight:800;margin-top:5px}
+.heatrel i{font-style:normal;font-size:10.5px;color:var(--text2);margin-top:2px}
+.heatrel:active{transform:scale(.98)}
+
+/* =====================================================================
+   Inlined README art (the contribution snake)
+   An SVG left in an <img> is animated by the image decoder, and a compositor
+   layer can skip that, which left the snake frozen until it was tapped. It is
+   now placed into the page itself, so the page animates it.
+   ===================================================================== */
+.md .svgart{display:block;margin:8px 0;max-width:100%;overflow:hidden;border-radius:14px}
+.md .svgart svg{display:block;width:100%;height:auto;max-width:100%}
+/* the README card is kept out of the entrance animation and the tap-scale, so
+   nothing about it can promote it into a layer that stops its art animating */
+.card.md{animation:none!important;transition:none!important}
+.card.md:active{transform:none!important;box-shadow:none!important}
+
+/* ---- the app says when it is running on the feed instead of the API ---- */
+.feednote{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-left:3px solid var(--accent)}
+.feednote b{font-size:13.5px;font-weight:650}
+.feednote span{font-size:12.5px;color:var(--text2);line-height:1.4}
+
+/* ---- the strip that says the app is running on saved data ---- */
+#limitBar{position:fixed;left:16px;right:16px;bottom:86px;z-index:35;display:flex;flex-direction:column;gap:1px;
+  background:var(--card);border:1px solid var(--divider);border-radius:18px;padding:10px 14px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);animation:limitIn .3s cubic-bezier(.34,1.4,.64,1)}
+#limitBar b{font-size:12.5px;font-weight:650}
+#limitBar span{font-size:11.5px;color:var(--text2)}
+@keyframes limitIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+body.limited #view{padding-bottom:150px}
+
+/* ---- settings hub: each section is a component that opens its own page ---- */
+.setlist{display:flex;flex-direction:column;padding:4px 8px}
+.setrow{display:flex;align-items:center;gap:14px;width:100%;background:none;border:none;font:inherit;color:inherit;text-align:left;cursor:pointer;padding:14px 10px;border-radius:16px;border-bottom:1px solid var(--divider)}
+.setrow:last-child{border-bottom:none}
+.setrow:active{background:var(--chip)}
+.setrow .lmain{display:flex;flex-direction:column;flex:1;min-width:0}
+.setrow .ltitle{display:block;font-size:15px;font-weight:600}
+.setrow .lsub{display:block;margin-top:2px;font-size:12.5px;color:var(--text2);white-space:normal;line-height:1.35}
+.setic{width:38px;height:38px;border-radius:13px;background:var(--chip);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)}
+.setic svg{width:19px;height:19px}
+.setgo{color:var(--text2);flex-shrink:0;opacity:.7}
+.setgo svg{width:16px;height:16px}
+
+/* a settings sub-page shows one section; the rest stay in the DOM, hidden, so
+   every control keeps its listener */
+body.set-hub #setSeg{display:none}
+body.set-hub #setFull{display:none}
+body.set-sub #setSeg{display:none}
+body.set-sub .setsec{display:none}
+body.set-sub .setsec[data-on]{display:block}
+body.set-sub .setsec > h2.sect{margin-top:4px}
+
+/* the page title already names the section, so the heading underneath is noise */
+body.set-sub .setsec[data-on] > h2.sect{display:none}
+
+/* a settings sub-page shows one section; the rest stay in the DOM, hidden, so
+   every control keeps its listener */
+body.set-hub #setSeg{display:none}
+body.set-hub #setFull{display:none}
+body.set-sub #setSeg{display:none}
+body.set-sub .setsec{display:none}
+body.set-sub .setsec[data-on]{display:block}
+body.set-sub .setsec > h2.sect{margin-top:4px}
+
+/* the page title already names the section, so the heading underneath is noise */
+body.set-sub .setsec[data-on] > h2.sect{display:none}
+
+/* settings pages: less air above and between the rows */
+.setrow{padding:10px 0}
+body.set-sub #pagehead{padding-bottom:6px}
+body.set-sub #view{padding-top:0}
+body.set-sub .setsec > .card{padding:16px}
+body.set-sub .setsec > h2.sect{margin-top:0}
+
+/* icons carry no colour of their own: the tile gives them a surface and the
+   glyph stays neutral, so the accent is kept for things that mean something */
+.setic,.gico,.wkic{color:var(--text2)}
+
+/* ---- settings search ---- */
+#setSearchWrap{margin-bottom:14px}
+.setrow.found{background:var(--chip);box-shadow:inset 0 0 0 1.5px var(--accent)}
+
+/* an explanatory empty state needs its words: the app's sub-lines are single
+   line by default, which cut the rate-limit message off mid-sentence */
+.card.empty .ltitle,.card.empty .lsub{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.45}
+.card.empty .ltitle{font-size:15px;font-weight:650}
+
+
+/* ---- live API budget chip and sheet ---- */
+#budgetChip{position:fixed;left:12px;bottom:92px;z-index:30;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+  background:var(--card);border:1px solid var(--divider);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;opacity:.92;
+  box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#budgetChip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+#budgetChip em{font-style:normal;opacity:.5}
+body.limited #budgetChip,body.sheetopen #budgetChip{display:none}
+.bmrow{margin-top:14px}
+.bmtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.bmtop b{font-size:14px}.bmtop span{font-size:12.5px;color:var(--text2)}
+.bmbar{height:8px;border-radius:99px;background:var(--divider);margin-top:6px;overflow:hidden}
+.bmbar i{display:block;height:100%;border-radius:99px;transition:width .4s}
+.bmsub{font-size:11.5px;color:var(--text2);margin-top:4px;line-height:1.45}
+
+/* repo settings: sections that load the first time they are opened */
+.lzcard [data-lzhead]{cursor:pointer}
+.lzchev{display:inline-block;margin-left:8px;opacity:.55;transition:transform .2s}
+.lzopen .lzchev{transform:rotate(90deg)}
+
+/* ---- the language picker ---- */
+.langrow{padding:11px 0}
+.langrow.on{background:var(--chip);border-radius:14px}
+.langrow .lsub{white-space:normal;line-height:1.35}
+
+/* file contents with a line-number gutter, one row per line so long lines can
+   wrap (like the GitHub app) without the numbers drifting out of step */
+.coderow{display:flex;align-items:flex-start}
+.coderow .ln{flex:0 0 auto;min-width:2.6em;padding:0 10px 0 12px;text-align:right;color:var(--text3,#6b7280);opacity:.7;user-select:none;-webkit-user-select:none;border-right:1px solid var(--divider,#26262b)}
+.coderow .codetext{flex:1 1 auto;min-width:0;padding:0 14px 0 10px;white-space:pre-wrap;word-break:break-word;tab-size:2}
+
+/* file contents with a line-number gutter (GitHub style) */
+.codewrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;background:transparent;border-radius:12px;
+  /* the same face the editor uses - this was lost when the duplicate rule was
+     removed, which left the preview falling back to the system font */
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:12.5px;line-height:1.6}
+.codewrap pre{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:12.5px;line-height:1.6;white-space:pre;tab-size:2;background:none;border:0;
+  /* .filepre caps itself at 66vh with its own scrollbar. Inside the gutter that
+     clips the code short while the numbers keep going, so the two disagree.
+     The sheet scrolls; this must not. */
+  max-height:none;overflow:visible}
+.codeln{color:var(--text3,#6b7280);text-align:right;padding:12px 10px 12px 14px;user-select:none;-webkit-user-select:none;flex:0 0 auto;border-right:1px solid var(--divider,#26262b);opacity:.75;position:sticky;left:0;background:var(--card,#121216)}
+.codelines{padding:12px 14px;flex:1 1 auto;min-width:0;color:var(--text,#e6e6e6)}
+.branchchip{display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:var(--chip,#1e1e24);border:0;
+  color:var(--text2,#b8b8c0);font-size:12px;font-weight:600;line-height:1.1;padding:5px 12px;border-radius:13px}
+.branchchip svg{width:12px;height:12px;opacity:.85;flex:0 0 auto}
+@media (max-width:520px){ .codewrap pre{max-height:none} }
+
+/* file editor: a gutter beside the textarea, kept in step with its scroll */
+.editwrap{display:flex;max-height:52vh;border-radius:14px;background:var(--bg);overflow:hidden;margin-top:4px}
+.editwrap .codeln{position:static;overflow:hidden;padding:12px 8px 12px 12px;flex:0 0 auto;
+  border-right:1px solid var(--divider,#26262b);background:transparent;opacity:.7;user-select:none;-webkit-user-select:none;
+  /* must match .editarea exactly or the numbers slide out of line with the text.
+     margin:0 too - this <pre> sits outside .codewrap, so it still carries the
+     browser's default 1em margin, which pushed every number down by a line. */
+  margin:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:12.5px;line-height:1.6}
+.editarea{flex:1 1 auto;min-width:0;border:0;outline:0;background:transparent;resize:none;
+  padding:12px 14px;min-height:40vh;max-height:52vh;overflow:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text,#e6e6e6);
+  /* wrap like the GitHub app instead of scrolling sideways; a code editor that
+     hides half of every long line is worse than a folded one */
+  white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden}
+
+/* full-screen file editor, commit bar pinned to the bottom */
+.sheetcard.efscreen{height:100dvh;max-height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.efhead{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;flex:0 0 auto;border-bottom:1px solid var(--divider,#26262b)}
+.efhead .iconbtn{flex:0 0 auto}
+.efname{display:flex;flex-direction:column;min-width:0}
+.efname .eftitle{font-size:17px;font-weight:700;line-height:1.2}
+.efname .efsub{font-size:12px;color:var(--text2,#b8b8c0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.efscreen .editwrap{flex:1 1 auto;min-height:0;max-height:none;border-radius:0;margin:0}
+.efscreen .editarea{min-height:0;max-height:none;height:100%}
+.efscreen .editwrap .codeln{max-height:none;overflow:hidden}
+.effoot{flex:0 0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;
+  border-top:1px solid var(--divider,#26262b);background:var(--card,#121216)}
+
+/* the file sheet: buttons sit close under the name, and the code gets its own
+   breathing room below them (it used to butt straight up against the buttons) */
+.fileacts{margin:0 0 12px}
+.codewrap{margin-top:0}
+
+/* per-row ⋯ button in the file list */
+.rowmenu{flex:0 0 auto;opacity:.65;margin-left:auto}
+.rowmenu svg{width:16px;height:16px}
+.lrow.sep{border-top:1px solid var(--divider,#26262b)}
+.fldrow{display:flex;align-items:center;gap:8px}
+.fldrow .fld{flex:1 1 auto;min-width:0}
+.fldext{flex:0 0 auto;padding:0 10px;color:var(--text2,#b8b8c0);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
