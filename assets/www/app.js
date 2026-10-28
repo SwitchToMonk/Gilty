@@ -233,23 +233,47 @@ function esc(s) {
 function nf(n) { n = n | 0; if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'm'; if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'k'; return String(n); }
 function tAgo(iso) { if (!iso) return ''; const s = (Date.now() - new Date(iso).getTime()) / 1000; if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + 'm ago'; if (s < 86400) return Math.floor(s / 3600) + 'h ago'; if (s < 2592e3) return Math.floor(s / 86400) + 'd ago'; if (s < 31536e3) return Math.floor(s / 2592e3) + 'mo ago'; return Math.floor(s / 31536e3) + 'y ago'; }
 function fmtSize(b) { if (b == null || b === '') return ''; if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; }
-function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toasts').appendChild(t); requestAnimationFrame(() => t.classList.add('show')); setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600); }
-/* File contents with a line-number gutter. The gutter and the code sit inside
-   one scrolling box, so they always move together - two separate scrollers was
-   the obvious first attempt and it desynchronises the moment you swipe. */
+function toast(msg) {
+  const box = $('#toasts');
+  if (!box) return;
+  /* One toast at a time. Tapping a button repeatedly used to stack nine copies
+     of the same message up the screen, which buried the thing being reported. */
+  box.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  box.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600);
+}
+/* File contents with a line-number gutter, one row per line so long lines can
+   wrap (like the GitHub app) without the numbers drifting out of step. */
 function codeWithLines(text) {
   let body = String(text == null ? '' : text);
-  /* a trailing newline is not an extra line - GitHub does not number it either */
   if (body.endsWith('\n')) body = body.slice(0, -1);
-  const lines = body.split('\n');
-  /* One row per line, each holding its own number. Two <pre> columns only line
-     up while nothing wraps; the moment a long line folds, the numbers drift out
-     of step with the code. Rows wrap like GitHub's own viewer and stay aligned. */
-  const rows = lines.map((ln, i) =>
+  const rows = body.split('\n').map((ln, i) =>
     '<div class="coderow"><span class="ln" aria-hidden="true">' + (i + 1) + '</span>' +
     '<span class="codetext">' + esc(ln || ' ') + '</span></div>').join('');
   return '<div class="codewrap">' + rows + '</div>';
 }
+/* A commit is a short title plus an optional longer description, exactly as
+   GitHub writes one: the title, a blank line, then the body. Every path that
+   commits builds its message here so the shape never drifts. */
+function commitComposer(prefix, title, titlePh) {
+  return '<label class="fldlabel">' + esc(i18n('commitMessage')) + '</label>' +
+    '<input class="fld" id="' + prefix + 'Title" value="' + esc(title || '') + '"' +
+    (titlePh ? ' placeholder="' + esc(titlePh) + '"' : '') + ' autocomplete="off" autocapitalize="sentences">' +
+    '<label class="fldlabel" style="margin-top:14px">' + esc(i18n('commitDesc')) +
+    ' <span class="dim" style="font-weight:400">' + esc(i18n('optional')) + '</span></label>' +
+    '<textarea class="replyta cmdesc" id="' + prefix + 'Desc" rows="3" placeholder="' + esc(i18n('commitDescPh')) + '"></textarea>';
+}
+function commitMsg(prefix, fallback) {
+  const tEl = $('#' + prefix + 'Title'), dEl = $('#' + prefix + 'Desc');
+  const t = ((tEl && tEl.value) || '').trim() || fallback;
+  const d = ((dEl && dEl.value) || '').trim();
+  return d ? t + '\n\n' + d : t;
+}
+
 function spinner(sm) { return '<div class="spinwrap' + (sm ? ' sm' : '') + '"><div class="spinner"></div></div>'; }
 /* Errors are explained, never dumped: GitHub's own wording is not something to
    put in front of anyone. */
@@ -276,11 +300,11 @@ const SVG = {
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   fork: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
-  branch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
   folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
   file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  branch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
   pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
@@ -999,9 +1023,6 @@ async function apiOnce(path, opts = {}) {
     delete headers['If-None-Match'];
     res = await fetch('https://api.github.com' + path, { method: opts.method || 'GET', headers, body: opts.body || undefined, cache: 'no-store' });
   }
-  /* Only a successful /user clears the count. Every other endpoint can succeed
-     while identity is broken, and resetting on those kept the count at zero -
-     so a genuinely dead token never reached the threshold. */
   if (res.ok && String(path).split('?')[0] === '/user') BAD_401 = 0;
   if (res.status === 401) {
     /* A 401 only means "you are signed out" when the token we just used is
@@ -1017,20 +1038,13 @@ async function apiOnce(path, opts = {}) {
         });
         reallyBad = chk.status === 401;
       } catch (e) { reallyBad = false; }   /* a network hiccup is not a bad token */
-      /* Only a proved session may be ended: during a sign-in USER still holds
-         the previous profile, so this would sign out the wrong account.
-         And one 401 is not proof either - a single endpoint can refuse while the
-         token is perfectly good. Three in a row, with no success in between, is
-         a dead token; anything less just fails that one request. */
+      /* one 401 can be a single unlucky endpoint; three in a row with no good
+         /user in between means the token really is dead */
       if (reallyBad && USER && !acctSwitching && sentToken === TOKEN) {
         const now = Date.now();
-        if (now - BAD_401_T > 120000) BAD_401 = 0;    /* only count a burst */
-        BAD_401_T = now;
-        BAD_401++;
-        if (BAD_401 >= 3) {
-          BAD_401 = 0;
-          doLogout('Session expired — sign in again', { keep: true });
-        }
+        if (now - BAD_401_T > 120000) BAD_401 = 0;
+        BAD_401_T = now; BAD_401++;
+        if (BAD_401 >= 3) { BAD_401 = 0; doLogout('Session expired — sign in again', { keep: true }); }
       }
     }
     throw new Error('Invalid or expired token');
@@ -1418,7 +1432,14 @@ function markNewRows(container, key) {
 /* the old top loading bar is gone - refreshing is now shown by the rows
    themselves sliding in */
 function refreshPulse() { }
-function cached(path) { try { const c = LS.get(cacheKey(path), null); if (c && (c.raw ? typeof c.d === 'string' : c.d !== undefined)) return c.d; } catch (e) {} return undefined; }
+function cached(path) {
+  /* A refresh the user asked for must never be answered from the saved copy.
+     Screens read this directly to paint instantly, which is right on a normal
+     open - but it also meant the pull-to-refresh changed nothing at all. */
+  if (FORCE_FRESH) return undefined;
+  try { const c = LS.get(cacheKey(path), null); if (c && (c.raw ? typeof c.d === 'string' : c.d !== undefined)) return c.d; } catch (e) { }
+  return undefined;
+}
 
 /* ================= theme (mode + accent + glow) ================= */
 function shadeHex(hex, f) {
@@ -1890,7 +1911,6 @@ async function switchAccount(login) {
    account is signed in. It carries the avatar of the NEXT account, so a tap
    switches straight to it; with more than two accounts a long press opens a
    menu to pick any of them. Delegated from document, so it survives re-renders. */
-/* which branch this repository is being viewed on (defaults to its own) */
 function branchFor(full) { try { return LS.get('branch.' + full, null); } catch (e) { return null; } }
 function setBranchFor(full, b) { try { if (b) LS.set('branch.' + full, b); else LS.del('branch.' + full); } catch (e) { } }
 
@@ -3076,10 +3096,7 @@ function trafficLine(series, unit) {
     '<div class="tl-hint">Tap a point for its ' + esc(unit) + '</div></div>';
 }
 
-/* ---------- switching branch ----------
-   Everything the repository screen reads - the file list, a file's contents, the
-   README - takes the branch chosen here. GitHub's own default stays the starting
-   point; picking another one is remembered per repository. */
+/* ---------- switching branch ---------- */
 async function branchSheet(o, n) {
   const full = o + '/' + n;
   openSheet('<div class="sheethead"><b>' + esc(i18n('switchBranch')) + '</b>' +
@@ -3097,28 +3114,20 @@ async function branchSheet(o, n) {
   const def = (repo && repo.default_branch) || '';
   let html = '<div class="sheethead"><b>' + esc(i18n('switchBranch')) + '</b>' +
     '<button class="iconbtn" data-act="closesheet">' + SVG.x + '</button></div>';
-  if (!list.length) {
-    html += '<div class="card empty">' + esc(i18n('noBranches')) + '</div>';
-  } else {
-    html += '<div class="card list">' + list.map(b => {
-      const active = b.name === cur;
-      return '<div class="lrow" data-br="' + esc(b.name) + '">' +
-        SVG.branch +
-        '<div class="lmain"><div class="ltitle">' + esc(b.name) + '</div>' +
-        (b.name === def ? '<div class="lsub">' + esc(i18n('defaultBranch')) + '</div>' : '') + '</div>' +
-        (active ? SVG.check : '') + '</div>';
-    }).join('') + '</div>';
-    if (cur && cur !== def) {
-      html += '<button class="btn ghost btnblock" id="brReset" style="margin-top:12px">' + esc(i18n('backToDefault')) + ' \u00b7 ' + esc(def) + '</button>';
-    }
+  if (!list.length) html += '<div class="card empty">' + esc(i18n('noBranches')) + '</div>';
+  else {
+    html += '<div class="card list">' + list.map(b =>
+      '<div class="lrow" data-br="' + esc(b.name) + '">' + SVG.branch +
+      '<div class="lmain"><div class="ltitle">' + esc(b.name) + '</div>' +
+      (b.name === def ? '<div class="lsub">' + esc(i18n('defaultBranch')) + '</div>' : '') + '</div>' +
+      (b.name === cur ? SVG.check : '') + '</div>').join('') + '</div>';
+    if (cur && cur !== def) html += '<button class="btn ghost btnblock" id="brReset" style="margin-top:12px">' + esc(i18n('backToDefault')) + ' \u00b7 ' + esc(def) + '</button>';
   }
   openSheet(html);
   $$('[data-br]').forEach(row => row.addEventListener('click', () => {
     const b = row.dataset.br;
     setBranchFor(full, b === def ? null : b);
-    closeSheet();
-    toast(i18n('onBranch') + ' ' + b);
-    route();
+    closeSheet(); toast(i18n('onBranch') + ' ' + b); route();
   }));
   const rs = $('#brReset');
   if (rs) rs.addEventListener('click', () => { setBranchFor(full, null); closeSheet(); toast(i18n('onBranch') + ' ' + def); route(); });
@@ -3164,34 +3173,10 @@ async function loadInvites() {
   }));
 }
 
-/* ---------- top repositories ----------
-   The same shape the GitHub app uses: the owner's picture, then owner/name. One
-   request, ordered by what was pushed to last, and nothing hardcoded. */
-async function loadTopRepos() {
-  const wrap = document.getElementById('topReposWrap');
-  if (!wrap) return;
-  let list = [];
-  try { list = await api('/user/repos?sort=pushed&per_page=8&affiliation=owner,collaborator,organization_member'); }
-  catch (e) { return; }
-  if (!Array.isArray(list) || !list.length) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = '<h2 class="sect">' + esc(i18n('topRepos')) + '</h2><div class="card list">' +
-    list.map((r, i) => {
-      const owner = (r.owner && r.owner.login) || '';
-      const av = (r.owner && r.owner.avatar_url) || '';
-      return '<div class="lrow' + (i ? ' sep' : '') + '" data-go="#/repo/' + esc(r.full_name) + '">' +
-        (av ? '<img class="cav" src="' + esc(av) + '" alt="">' : '<div class="cav"></div>') +
-        '<div class="lmain"><div class="ltitle">' + esc(r.name) + '</div>' +
-        '<div class="lsub">' + esc(owner) + (r.private ? ' \u00b7 ' + esc(i18n('repoPrivate')) : '') + '</div></div>' +
-        (r.language ? '<span class="dot" style="background:' + langColor(r.language) + '"></span>' : '') +
-        '</div>';
-    }).join('') + '</div>';
-}
-
 /* ---------- renaming a file or folder ----------
-   GitHub has no "folder" object, so a rename is done through the Git data API:
-   one tree that adds the new paths and removes the old ones, one commit, and one
-   ref update. A file takes three requests, a folder with fifty files still takes
-   three - doing it per file would cost a hundred. */
+   GitHub has no folder object, so a rename goes through the Git data API: one
+   tree that adds the new paths and removes the old ones, one commit, one ref
+   update. A folder with fifty files still costs three requests. */
 function fileMenuSheet(o, n, path, isDir) {
   const full = o + '/' + n;
   const name = path.split('/').pop();
@@ -3205,23 +3190,23 @@ function fileMenuSheet(o, n, path, isDir) {
       '<div class="lmain"><div class="ltitle" style="color:var(--danger,#ff5d5d)">' + esc(i18n('delete')) + '</div></div></div>' : '') +
     '</div>');
   $$('[data-m]').forEach(r => r.addEventListener('click', () => {
-    const m = r.dataset.m;
-    closeSheet();
+    const m = r.dataset.m; closeSheet();
     if (m === 'rename') renameSheet(full, path, isDir);
     else confirmDeleteFile(full, path);
   }));
 }
-
 function renameSheet(full, path, isDir) {
   const oldName = path.split('/').pop();
   const dir = path.split('/').slice(0, -1).join('/');
-  const ext = isDir ? '' : (oldName.lastIndexOf('.') > 0 ? oldName.slice(oldName.lastIndexOf('.')) : '');
+  const dot = isDir ? -1 : oldName.lastIndexOf('.');
+  const ext = dot > 0 ? oldName.slice(dot) : '';
   const base = ext ? oldName.slice(0, -ext.length) : oldName;
   openSheet('<div class="sheethead"><b>' + esc(i18n('rename')) + '</b>' +
     '<button class="iconbtn" data-act="closesheet">' + SVG.x + '</button></div>' +
     '<div class="lsub" style="margin:0 4px 10px">' + esc(isDir ? i18n('renameFolderNote') : i18n('renameFileNote')) + '</div>' +
     '<div class="fldrow"><input class="fld" id="rnBase" value="' + esc(base) + '" autocomplete="off" autocapitalize="none" spellcheck="false">' +
     (ext ? '<span class="fldext">' + esc(ext) + '</span>' : '') + '</div>' +
+    '<div style="margin-top:16px">' + commitComposer('rn', 'Rename ' + oldName + ' to ' + (base + ext).trim()) + '</div>' +
     '<button class="btn primary btnblock" id="rnGo" style="margin-top:16px">' + esc(i18n('rename')) + '</button>');
   const inp = $('#rnBase');
   if (inp) { inp.focus(); try { inp.setSelectionRange(base.length, base.length); } catch (e) { } }
@@ -3230,12 +3215,11 @@ function renameSheet(full, path, isDir) {
     const nb = ($('#rnBase').value || '').trim();
     if (!nb) { toast(i18n('rename')); return; }
     const newName = nb + ext;
-    if (newName === oldName) { closeSheet(); return; }
+    if (newName === oldName) { toast(i18n('noChangesRename')); return; }
     go.disabled = true; go.textContent = i18n('renaming');
     try {
-      await renamePath(full, path, dir ? dir + '/' + newName : newName, isDir);
-      closeSheet();
-      toast(i18n('renamedTo') + ' ' + newName);
+      await renamePath(full, path, dir ? dir + '/' + newName : newName, isDir, commitMsg('rn', 'Rename ' + oldName + ' to ' + newName));
+      closeSheet(); toast(i18n('renamedTo') + ' ' + newName);
       const parts = full.split('/');
       renderFiles(parts[0], parts[1], dir);
     } catch (e) {
@@ -3244,21 +3228,15 @@ function renameSheet(full, path, isDir) {
     }
   });
 }
-
-async function renamePath(full, oldPath, newPath, isDir) {
-  const br = branchFor(full);
-  let branch = br;
-  if (!branch) {
-    const rp = await api('/repos/' + full);
-    branch = (rp && rp.default_branch) || 'main';
-  }
+async function renamePath(full, oldPath, newPath, isDir, message) {
+  let branch = branchFor(full);
+  if (!branch) { const rp = await api('/repos/' + full); branch = (rp && rp.default_branch) || 'main'; }
   const ref = await api('/repos/' + full + '/git/ref/heads/' + encodeURIComponent(branch));
   const headSha = ref && ref.object && ref.object.sha;
   if (!headSha) throw new Error('Could not read the branch');
   const commit = await api('/repos/' + full + '/git/commits/' + headSha);
   const baseTree = commit && commit.tree && commit.tree.sha;
   if (!baseTree) throw new Error('Could not read the commit');
-
   const tree = [];
   if (!isDir) {
     const f = await api('/repos/' + full + '/contents/' + encodeURIComponent(oldPath).replace(/%2F/g, '/') + '?ref=' + encodeURIComponent(branch));
@@ -3276,13 +3254,30 @@ async function renamePath(full, oldPath, newPath, isDir) {
     });
   }
   const made = await api('/repos/' + full + '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: baseTree, tree }) });
-  const nc = await api('/repos/' + full + '/git/commits', {
-    method: 'POST',
-    body: JSON.stringify({ message: 'Rename ' + oldPath.split('/').pop() + ' to ' + newPath.split('/').pop(), tree: made.sha, parents: [headSha] })
-  });
+  const nc = await api('/repos/' + full + '/git/commits', { method: 'POST', body: JSON.stringify({ message: message || ('Rename ' + oldPath.split('/').pop() + ' to ' + newPath.split('/').pop()), tree: made.sha, parents: [headSha] }) });
   await api('/repos/' + full + '/git/refs/heads/' + encodeURIComponent(branch), { method: 'PATCH', body: JSON.stringify({ sha: nc.sha }) });
   dropApiMem();
   return nc.sha;
+}
+
+/* ---------- top repositories ---------- */
+async function loadTopRepos() {
+  const wrap = document.getElementById('topReposWrap');
+  if (!wrap) return;
+  let list = [];
+  try { list = await api('/user/repos?sort=pushed&per_page=8&affiliation=owner,collaborator,organization_member'); } catch (e) { return; }
+  if (!Array.isArray(list) || !list.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<h2 class="sect">' + esc(i18n('topRepos')) + '</h2><div class="card list">' +
+    list.map((r, i) => {
+      const owner = (r.owner && r.owner.login) || '';
+      const av = (r.owner && r.owner.avatar_url) || '';
+      return '<div class="lrow' + (i ? ' sep' : '') + '" data-go="#/repo/' + esc(r.full_name) + '">' +
+        (av ? '<img class="cav" src="' + esc(av) + '" alt="">' : '<div class="cav"></div>') +
+        '<div class="lmain"><div class="ltitle">' + esc(r.name) + '</div>' +
+        '<div class="lsub">' + esc(owner) + (r.private ? ' \u00b7 ' + esc(i18n('repoPrivate')) : '') + '</div></div>' +
+        (r.language ? '<span class="dot" style="background:' + langColor(r.language) + '"></span>' : '') +
+        '</div>';
+    }).join('') + '</div>';
 }
 
 /* ---------- adding people to a repository ----------
@@ -3611,10 +3606,30 @@ async function route() {
 }
 
 /* ================= components ================= */
+/* an avatar that cannot load is replaced by the owner's initial */
+document.addEventListener('error', (e) => {
+  const img = e.target;
+  if (!img || !img.classList || !img.classList.contains('rcavimg')) return;
+  const host = img.parentElement; if (!host) return;
+  const initial = img.dataset.initial || '?';
+  img.remove();
+  if (!host.querySelector('.rcletter')) {
+    const b = document.createElement('b'); b.className = 'rcletter'; b.textContent = initial; host.appendChild(b);
+  }
+}, true);
+
 function repoRow(r) {
   const full = r.full_name || ((r.owner ? r.owner.login : '') + '/' + r.name);
+  const owner = (r.owner && r.owner.login) || String(full).split('/')[0] || '';
+  const avatar = (r.owner && r.owner.avatar_url) || '';
+  const initial = esc((owner || r.name || '?').charAt(0).toUpperCase());
   return '<div class="card" data-go="#/repo/' + full + '">' +
-    '<div class="rcrow"><div class="rcname">' + esc(r.name) + '</div>' +
+    '<div class="rcrow">' +
+    '<span class="rcavatar">' + (avatar
+      ? '<img class="rcavimg" src="' + esc(avatar) + '" alt="" loading="lazy" data-initial="' + initial + '">'
+      : '<b class="rcletter">' + initial + '</b>') + '</span>' +
+    '<div class="rchead"><div class="rcname">' + esc(r.name) + '</div>' +
+    (owner ? '<div class="rcowner">' + esc(owner) + '</div>' : '') + '</div>' +
     '<button class="pinbtn ' + (isPinned(full) ? 'pinned' : '') + '" data-pinbtn="' + esc(full) + '" aria-label="pin">' + SVG.star + '</button></div>' +
     '<p class="rcdesc">' + esc(r.description || 'No description') + '</p>' +
     '<div class="rcmeta">' + SVG.star + ' ' + nf(r.stargazers_count) + ' · ' + SVG.fork + ' ' + nf(r.forks_count) +
@@ -4573,8 +4588,8 @@ async function renderHome() {
   html += '<div class="card quicklinks"><button class="btn ghost" data-go="#/productivity">' + esc(i18n('productivity')) + '</button><button class="btn ghost" data-act="discover">' + esc(i18n('discover')) + '</button><button class="btn ghost" data-go="#/user/' + esc(u.login) + '">' + esc(i18n('myProfile')) + '</button></div>';
   html += '<div id="inviteWrap"></div>';
   html += '<div id="topReposWrap"></div>';
-  html += '<h2 class="sect">' + esc(i18n('pinned')) + '</h2>';
-  html += pins.length ? pins.map(repoRow).join('') : '<div class="card empty">' + esc(i18n('pinnedEmpty')) + '<br><span class="dim">' + esc(i18n('pinnedSync')) + '</span></div>';
+  /* the Pinned repositories section is gone from the home screen - starring
+     still pins and pins still sync, they just are not shown here */
   const feedHtml = evs => (evs.length ? '<div class="card list">' + evs.slice(0, 3).map(eventRow).join('') + '</div>' : '<div class="card empty">' + esc(i18n('nothingYet')) + '</div>') +
     '<button class="btn ghost btnblock" style="margin-top:12px" id="allActBtn">' + esc(i18n('viewAllActivity')) + '</button>';
   const cHist = savedHistory();
@@ -5161,6 +5176,9 @@ async function renderFiles(o, n, path) {
     if (/is empty/i.test(e.message || '')) {
       view().innerHTML = actRow + '<input type="file" id="upInput" multiple hidden><div class="card empty">This repository is empty \u2014 add your first file to get started.</div>';
       wireFileActions(o, n, path);
+  view().querySelectorAll('.rowmenu').forEach(btn => {
+    btn.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); fileMenuSheet(o, n, btn.dataset.menu, btn.dataset.dir === '1'); });
+  });
   { const bc = $('#branchChip'); if (bc) bc.addEventListener('click', (e) => { e.stopPropagation(); branchSheet(o, n); }); }
       return;
     }
@@ -5169,7 +5187,6 @@ async function renderFiles(o, n, path) {
   if (!Array.isArray(items)) { view().innerHTML = '<div class="card empty">Not a folder.</div>'; return; }
   items.sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1)));
   let html = path ? '<div class="card crumb">/' + esc(path) + '</div>' : '';
-  /* the branch you are browsing, right above the files */
   const r0 = cached('/repos/' + full) || null;
   if (r0 && r0.default_branch) {
     const cb = branchFor(full) || r0.default_branch;
@@ -5184,23 +5201,22 @@ async function renderFiles(o, n, path) {
   }
   items.forEach(it => {
     if (it.type === 'dir') html += '<div class="lrow" data-go="#/repo/' + full + '/files/' + it.path + '">' + SVG.folder + '<div class="lmain"><div class="ltitle">' + esc(it.name) + '</div></div>' +
-      '<button class="iconbtn rowmenu" data-menu="' + esc(it.path) + '" data-dir="1" aria-label="more">' + SVG.more + '</button></div>';
+      '<span class="rowacts"><button class="iconbtn rowmenu" data-menu="' + esc(it.path) + '" data-dir="1" aria-label="more">' + SVG.more + '</button></span></div>';
     else html += '<div class="lrow" data-act="openfile" data-repo="' + esc(full) + '" data-file="' + esc(it.path) + '">' + SVG.file + '<div class="lmain"><div class="ltitle">' + esc(it.name) + '</div><div class="lsub">' + fmtSize(it.size) + '</div></div>' +
-      '<button class="iconbtn rowmenu" data-menu="' + esc(it.path) + '" data-dir="0" aria-label="more">' + SVG.more + '</button>' +
       /* download straight from the list, without opening the file first */
-      '<button class="iconbtn" data-act="apidl" data-owner="' + esc(o) + '" data-repo="' + esc(n) + '" data-path="' + esc(it.path) + '" data-name="' + esc(it.name) + '" aria-label="download ' + esc(it.name) + '">' + SVG.dl + '</button></div>';
+      '<span class="rowacts">' +
+      '<button class="iconbtn" data-act="apidl" data-owner="' + esc(o) + '" data-repo="' + esc(n) + '" data-path="' + esc(it.path) + '" data-name="' + esc(it.name) + '" aria-label="download ' + esc(it.name) + '">' + SVG.dl + '</button>' +
+      '<button class="iconbtn rowmenu" data-menu="' + esc(it.path) + '" data-dir="0" aria-label="more">' + SVG.more + '</button>' +
+      '</span></div>';
   });
   html += '</div>';
   if (seq !== RSEQ) return;
   view().innerHTML = html;
   wireFileActions(o, n, path);
-  { const bc = $('#branchChip'); if (bc) bc.addEventListener('click', (e) => { e.stopPropagation(); branchSheet(o, n); }); }
   view().querySelectorAll('.rowmenu').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
-      ev.preventDefault(); ev.stopPropagation();
-      fileMenuSheet(o, n, btn.dataset.menu, btn.dataset.dir === '1');
-    });
+    btn.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); fileMenuSheet(o, n, btn.dataset.menu, btn.dataset.dir === '1'); });
   });
+  { const bc = $('#branchChip'); if (bc) bc.addEventListener('click', (e) => { e.stopPropagation(); branchSheet(o, n); }); }
   let lpTimer = null, lpFired = false;
   view().querySelectorAll('[data-act="openfile"]').forEach(row => {
     row.addEventListener('pointerdown', () => {
@@ -5596,14 +5612,13 @@ function rollbackSheet(o, n, c, branch, cnt) {
 /* asks for a custom commit message before an upload commits */
 function commitMsgSheet(title, prefill, onGo, onCancel) {
   openSheet('<div class="sheethead"><b>' + esc(title) + '</b><button class="iconbtn" id="cmX" aria-label="close">' + SVG.x + '</button></div>' +
-    '<label class="fldlabel">Commit message</label>' +
-    '<input class="fld" id="cmMsg" value="' + esc(prefill) + '" maxlength="200" autocomplete="off" spellcheck="false">' +
+    commitComposer('cm', prefill) +
     '<button class="btn primary btnblock" id="cmGo" style="margin-top:16px">Commit</button>');
-  const inp = $('#cmMsg');
-  try { inp.focus(); } catch (e) {}
+  const inp = $('#cmTitle');
+  try { if (inp) inp.focus(); } catch (e) { }
   $('#cmX').addEventListener('click', () => { closeSheet(); if (onCancel) onCancel(); });
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') $('#cmGo').click(); });
-  $('#cmGo').addEventListener('click', () => { const m = inp.value.trim() || prefill; closeSheet(); onGo(m); });
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') $('#cmGo').click(); });
+  $('#cmGo').addEventListener('click', () => { const m = commitMsg('cm', prefill); closeSheet(); onGo(m); });
 }
 
 /* full file content at a commit, plus its diff \u2014 GitHub-style "view file" */
@@ -6203,7 +6218,7 @@ function addFileSheet(o, n, path, prefill) {
     '<label class="fldlabel" style="margin-top:12px">Content</label>' +
     '<textarea class="replyta" id="afBody" placeholder="File contents…"></textarea>' +
     '<label class="fldlabel" style="margin-top:12px">Commit message</label>' +
-    '<input class="fld" id="afMsg" placeholder="Create file" autocomplete="off">' +
+    commitComposer('af', '', i18n('createFile')) +
     '<button class="btn primary btnblock" id="afSubmit" style="margin-top:18px">Commit file</button>');
   if (prefill) $('#afName').value = prefill;
   $('#afSubmit').addEventListener('click', async () => {
@@ -6215,7 +6230,7 @@ function addFileSheet(o, n, path, prefill) {
     try {
       const b64 = btoa(unescape(encodeURIComponent(content)));
       const p = path ? path + '/' + fname : fname;
-      const body = { message: $('#afMsg').value.trim() || ('Create ' + fname), content: b64 };
+      const body = { message: commitMsg('af', 'Create ' + fname), content: b64 };
       const meta = await api('/repos/' + o + '/' + n + '/contents/' + p, { status: true }).catch(() => null);
       if (meta && meta.ok && meta.data && meta.data.sha) body.sha = meta.data.sha;
       await api('/repos/' + o + '/' + n + '/contents/' + p, { method: 'PUT', body: JSON.stringify(body) });
@@ -6319,38 +6334,36 @@ async function uploadAsset(full, id, file, keepOpen, name) {
 
 function editFileSheet(full, path, raw, sha) {
   const name = path.split('/').pop();
-  /* a full screen with the commit button pinned to the bottom, the way the
-     GitHub app does it: on a long file the button must never scroll away */
+  /* A full screen, the way the GitHub app edits a file: the code takes whatever
+     height is left and the commit controls stay pinned to the bottom, so they
+     never scroll away however long the file is. */
   openSheet('<div class="efhead">' +
     '<button class="iconbtn" data-act="closesheet" aria-label="close">' + SVG.x + '</button>' +
     '<div class="efname"><span class="eftitle">' + esc(i18n('editFileTitle')) + '</span>' +
-    '<span class="efsub">' + esc(name) + '</span></div></div>' +
+    '<span class="efsub">' + esc(path) + '</span></div></div>' +
     '<div class="editwrap"><pre class="codeln" id="efGutter" aria-hidden="true"></pre>' +
     '<textarea class="replyta editarea" id="efBody" spellcheck="false" autocapitalize="none"></textarea></div>' +
-    '<div class="effoot"><input class="fld" id="efMsg" value="Update ' + esc(name) + '" placeholder="' + esc(i18n('commitMessage')) + '" autocomplete="off">' +
-    '<button class="btn primary btnblock" id="efSave">' + esc(i18n('commitChanges')) + '</button></div>');
+    '<div class="effoot">' +
+    commitComposer('ef', 'Update ' + name) +
+    '<div class="btnrow" style="margin-top:12px">' +
+    '<button class="btn ghost" id="efRename">' + esc(i18n('rename')) + '</button>' +
+    '<button class="btn primary" id="efSave">' + esc(i18n('commitChanges')) + '</button></div></div>');
   { const c = document.querySelector('.sheetcard'); if (c) c.classList.add('efscreen'); }
   const ta = $('#efBody'), gut = $('#efGutter');
   ta.value = raw;
-  /* numbers follow the text as you type, and follow the scroll as you move -
-     a textarea cannot hold a gutter itself, so the two are kept in step */
-  /* The text now wraps like GitHub's editor, so a logical line can occupy
-     several rows on screen. The gutter therefore has to be measured, not
-     counted: a hidden mirror with the same font and width tells us how many
-     rows each line takes, and the numbers are spaced to match. */
+  /* The text wraps, so a logical line can occupy several rows. The gutter is
+     measured with a hidden mirror rather than counted, so the numbers stay
+     beside the first row of each line. */
   const mirror = document.createElement('div');
-  mirror.style.cssText = 'position:absolute;top:-99999px;left:-99999px;visibility:hidden;' +
-    'white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box;';
+  mirror.style.cssText = 'position:absolute;top:-99999px;left:-99999px;visibility:hidden;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box;';
   document.body.appendChild(mirror);
   const paintNums = () => {
     try {
       const cs = getComputedStyle(ta);
       const w = Math.max(40, ta.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0));
       mirror.style.width = w + 'px';
-      mirror.style.fontFamily = cs.fontFamily;
-      mirror.style.fontSize = cs.fontSize;
-      mirror.style.lineHeight = cs.lineHeight;
-      mirror.style.letterSpacing = cs.letterSpacing;
+      mirror.style.fontFamily = cs.fontFamily; mirror.style.fontSize = cs.fontSize;
+      mirror.style.lineHeight = cs.lineHeight; mirror.style.letterSpacing = cs.letterSpacing;
       const lh = parseFloat(cs.lineHeight) || 20;
       const out = [];
       ta.value.split('\n').forEach((ln, i) => {
@@ -6366,13 +6379,18 @@ function editFileSheet(full, path, raw, sha) {
   ta.addEventListener('input', paintNums);
   ta.addEventListener('scroll', () => { gut.scrollTop = ta.scrollTop; });
   paintNums();
+  { const rb = $('#efRename'); if (rb) rb.addEventListener('click', () => { closeSheet(); renameSheet(full, path, false); }); }
   $('#efSave').addEventListener('click', async () => {
     const content = $('#efBody').value;
-    if (content === raw) { toast('No changes to commit'); return; }
+    if (content === raw) {
+      /* the commit message field is not the file name - point at the right one */
+      toast(i18n('noChangesRename'));
+      return;
+    }
     $('#efSave').disabled = true;
     try {
       const b64 = btoa(unescape(encodeURIComponent(content)));
-      await api('/repos/' + full + '/contents/' + path, { method: 'PUT', body: JSON.stringify({ message: $('#efMsg').value.trim() || ('Update ' + name), content: b64, sha }) });
+      await api('/repos/' + full + '/contents/' + path, { method: 'PUT', body: JSON.stringify({ message: commitMsg('ef', 'Update ' + name), content: b64, sha }) });
       closeSheet(); toast('Committed changes');
       const parts = full.split('/'), dir = path.split('/').slice(0, -1).join('/');
       renderFiles(parts[0], parts[1], dir);
@@ -6524,14 +6542,13 @@ function deleteAssetSheet(full, aid, name) {
 function deleteFileSheet(full, path, sha) {
   const name = path.split('/').pop();
   openSheet('<div class="sheethead"><b>Delete — ' + esc(name) + '</b><button class="iconbtn" data-act="closesheet">' + SVG.x + '</button></div>' +
-    '<label class="fldlabel">Commit message</label>' +
-    '<input class="fld" id="dfMsg" value="Delete ' + esc(name) + '" autocomplete="off">' +
+    commitComposer('df', 'Delete ' + name) +
     '<p class="dim" style="margin:12px 4px 14px">Delete this file from the repository? This creates a commit — it can be reverted on GitHub but not undone from here.</p>' +
     '<button class="btn danger btnblock" id="dfConfirm">Delete file</button>');
   $('#dfConfirm').addEventListener('click', async () => {
     $('#dfConfirm').disabled = true;
     try {
-      await api('/repos/' + full + '/contents/' + path, { method: 'DELETE', body: JSON.stringify({ message: $('#dfMsg').value.trim() || ('Delete ' + name), sha }) });
+      await api('/repos/' + full + '/contents/' + path, { method: 'DELETE', body: JSON.stringify({ message: commitMsg('df', 'Delete ' + name), sha }) });
       closeSheet(); toast('Deleted ' + name);
       const parts = full.split('/'), dir = path.split('/').slice(0, -1).join('/');
       renderFiles(parts[0], parts[1], dir);
@@ -7751,8 +7768,6 @@ const ACTIONS = {
               '<button class="btn danger" id="delFileBtn" style="flex:1">Delete</button>';
           }
           acts += '</div>';
-          /* above the code: a long file used to push these to the very bottom,
-             so Edit and Delete were invisible until you scrolled all the way */
           card.innerHTML = headHtml + acts + codeHtml;
           if (canEdit && raw) {
             $('#editFileBtn').addEventListener('click', () => editFileSheet(full, path, raw, meta.sha));
@@ -7904,12 +7919,7 @@ $('#refreshBig').addEventListener('click', doRefresh);
 $('#refreshApp').addEventListener('click', doRefresh);
 /* shared by token login and OAuth: validates the token, stores it, restores sync */
 async function completeLogin(tok) {
-  const old = TOKEN, prevUser = USER; TOKEN = tok;
-  /* While this runs the new token is being proved. Any request that fails here
-     belongs to the sign-in, not to a session that has expired - treating it as
-     the latter is what made "Continue with GitHub" sign you straight back out. */
-  acctSwitching = true;
-  setTimeout(() => { acctSwitching = false; }, 15000);
+  const old = TOKEN; TOKEN = tok;
   dropInflight();
   dropApiMem();                     /* nothing cached for the previous account may answer this */
   try {
@@ -7918,23 +7928,7 @@ async function completeLogin(tok) {
        made a new sign-in overwrite the existing account with the new token
        instead of adding a second one - which in turn hid the switch button,
        because the list never grew past one. */
-    /* GitHub's edge sometimes answers the first call with a 401 for a token it
-       has only just minted. One such reply used to end the whole session, which
-       is what "Continue with GitHub" signing you straight out looked like. */
-    /* a LOCAL variable: USER still holds the previous profile here, and looping
-       on that made the loop skip itself, so the sign-in "succeeded" with a token
-       it had never proved - every later request then failed and the app looked
-       like it was signing itself out. */
-    let proved = null, lastErr = null;
-    for (let attempt = 0; attempt < 3 && !proved; attempt++) {
-      try { proved = await api('/user', { fresh: true }); }
-      catch (e) {
-        lastErr = e;
-        if (attempt < 2) await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
-      }
-    }
-    if (!proved) throw lastErr || new Error('Could not read your profile');
-    USER = proved;
+    USER = await api('/user', { fresh: true });
     /* A sign-in - the same account signing in again through GitHub especially -
        used to keep every screen the last session saved, plus the stamps that
        stopped those screens reloading. That is why it opened on old data. */
@@ -7962,10 +7956,7 @@ async function completeLogin(tok) {
        and it was never checked on either sign-in method. */
     try { warnMissingScopes(); } catch (e) { }
   } catch (e) {
-    /* the sign-in did not complete - put back exactly what was there before, so
-       a failed attempt never costs you the session you already had */
-    TOKEN = old; USER = prevUser;
-    acctSwitching = false;
+    TOKEN = old; USER = null;
     throw e;
   }
 }
@@ -8462,7 +8453,7 @@ async function renderRun(o, n, id) {
     ' · ' + esc(active ? run.status : (run.conclusion || run.status)) + (runDur(run) ? ' · took ' + runDur(run) : '') + '</div>' +
     '<div class="actionrow" style="margin-top:14px">' +
     (active ? '<button class="btn danger" id="runCancel">Cancel run</button>' : '<button class="btn ghost" id="runRerun">Re-run</button>') +
-    '<button class="btn ghost" data-act="ext" data-url="' + esc(run.html_url) + '">' + SVG.ext + '<span>Open on GitHub</span></button></div></div>';
+    '</div></div>';
   html += '<h2 class="sect">Jobs</h2>';
   if (!jobs.length) html += '<div class="card empty">No job details for this run.</div>';
   else {

@@ -236,7 +236,7 @@ a.segb.on{color:var(--accent)}
 .rcmeta{margin-top:13px;font-size:12.5px;color:var(--text2);display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px}
 .rcmeta svg{width:15px;height:15px;vertical-align:-3px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:-1px;margin-right:4px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 0;align-items:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 0}
 .chip{background:var(--chip);border-radius:13px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2)}
 .chip.ok{background:rgba(46,160,67,.14);color:var(--ok)}
 .chip.closed{background:rgba(130,80,223,.14);color:var(--purple)}
@@ -333,11 +333,9 @@ a.segb.on{color:var(--accent)}
 .sheetcard{background:var(--card);width:100%;border-radius:36px 36px 0 0;padding:14px 16px 30px;max-height:86vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;animation:sheetUp .32s cubic-bezier(.2,.8,.25,1)}
 /* v2.66: while a sheet is open the page behind it cannot scroll */
 body.sheetopen #scroller{overflow:hidden}
-.sheethead{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 8px;gap:10px}
+.sheethead{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 14px;gap:10px}
 .sheethead b{font-size:15px;word-break:break-all}
-.filepre{background:transparent;padding:0;border-radius:0;font-size:12.5px;line-height:1.6;
-  overflow:visible;max-height:none;white-space:pre;word-break:normal;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--text)}
+.filepre{background:var(--bg);padding:14px;border-radius:18px;font-size:12px;line-height:1.5;overflow:auto;max-height:66vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--text)}
 
 /* ---------- toast & spinner ---------- */
 #toasts{position:fixed;bottom:100px;left:0;right:0;display:flex;flex-direction:column;align-items:center;z-index:80;pointer-events:none}
@@ -489,7 +487,7 @@ body.showunderline .md a, body.showunderline .card.md a{text-decoration:underlin
   .sheetcard { max-width: 580px; border-radius: 32px; max-height: 82vh; padding: 20px 22px 26px; }
   .sheethead { padding: 4px 6px 14px; }
   .sheethead b { font-size: 16px; }
-  /* nothing: the numbered block must never cap its own height */
+  .filepre { max-height: 56vh; }
   #toasts { bottom: 40px; }
 }
 
@@ -988,52 +986,39 @@ body.limited #budgetChip,body.sheetopen #budgetChip{display:none}
 .langrow.on{background:var(--chip);border-radius:14px}
 .langrow .lsub{white-space:normal;line-height:1.35}
 
-/* file contents with a line-number gutter, one row per line so long lines can
-   wrap (like the GitHub app) without the numbers drifting out of step */
+/* file contents: one row per line so long lines wrap and numbers stay aligned */
+.codewrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;background:transparent;border-radius:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:12.5px;line-height:1.6}
 .coderow{display:flex;align-items:flex-start}
 .coderow .ln{flex:0 0 auto;min-width:2.6em;padding:0 10px 0 12px;text-align:right;color:var(--text3,#6b7280);opacity:.7;user-select:none;-webkit-user-select:none;border-right:1px solid var(--divider,#26262b)}
 .coderow .codetext{flex:1 1 auto;min-width:0;padding:0 14px 0 10px;white-space:pre-wrap;word-break:break-word;tab-size:2}
-
-/* file contents with a line-number gutter (GitHub style) */
-.codewrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;background:transparent;border-radius:12px;
-  /* the same face the editor uses - this was lost when the duplicate rule was
-     removed, which left the preview falling back to the system font */
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  font-size:12.5px;line-height:1.6}
-.codewrap pre{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:12.5px;line-height:1.6;white-space:pre;tab-size:2;background:none;border:0;
-  /* .filepre caps itself at 66vh with its own scrollbar. Inside the gutter that
-     clips the code short while the numbers keep going, so the two disagree.
-     The sheet scrolls; this must not. */
-  max-height:none;overflow:visible}
-.codeln{color:var(--text3,#6b7280);text-align:right;padding:12px 10px 12px 14px;user-select:none;-webkit-user-select:none;flex:0 0 auto;border-right:1px solid var(--divider,#26262b);opacity:.75;position:sticky;left:0;background:var(--card,#121216)}
-.codelines{padding:12px 14px;flex:1 1 auto;min-width:0;color:var(--text,#e6e6e6)}
+.filepre{background:transparent;padding:0;border-radius:0;font-size:12.5px;line-height:1.6;overflow:visible;max-height:none;white-space:pre;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--text)}
 .branchchip{display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:var(--chip,#1e1e24);border:0;
   color:var(--text2,#b8b8c0);font-size:12px;font-weight:600;line-height:1.1;padding:5px 12px;border-radius:13px}
 .branchchip svg{width:12px;height:12px;opacity:.85;flex:0 0 auto}
-@media (max-width:520px){ .codewrap pre{max-height:none} }
-
-/* file editor: a gutter beside the textarea, kept in step with its scroll */
-.editwrap{display:flex;max-height:52vh;border-radius:14px;background:var(--bg);overflow:hidden;margin-top:4px}
-.editwrap .codeln{position:static;overflow:hidden;padding:12px 8px 12px 12px;flex:0 0 auto;
-  border-right:1px solid var(--divider,#26262b);background:transparent;opacity:.7;user-select:none;-webkit-user-select:none;
-  /* must match .editarea exactly or the numbers slide out of line with the text.
-     margin:0 too - this <pre> sits outside .codewrap, so it still carries the
-     browser's default 1em margin, which pushed every number down by a line. */
-  margin:0;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  font-size:12.5px;line-height:1.6}
-.editarea{flex:1 1 auto;min-width:0;border:0;outline:0;background:transparent;resize:none;
-  padding:12px 14px;min-height:40vh;max-height:52vh;overflow:auto;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  font-size:12.5px;line-height:1.6;color:var(--text,#e6e6e6);
-  /* wrap like the GitHub app instead of scrolling sideways; a code editor that
-     hides half of every long line is worse than a folded one */
-  white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden}
-
-/* full-screen file editor, commit bar pinned to the bottom */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 0;align-items:center}
+.fileacts{margin:0 0 12px}
+.rowacts{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;gap:2px}
+.rowacts .iconbtn{flex:0 0 auto}
+.rowmenu{flex:0 0 auto;opacity:.65}
+.rowmenu svg{width:16px;height:16px}
+.lrow.sep{border-top:1px solid var(--divider,#26262b)}
+.fldrow{display:flex;align-items:center;gap:8px}
+.fldrow .fld{flex:1 1 auto;min-width:0}
+.fldext{flex:0 0 auto;padding:0 10px;color:var(--text2,#b8b8c0);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+/* repository card: owner avatar, name and login */
+.rcrow{gap:10px}
+.rcavatar{position:relative;flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--chip,#1e1e24);color:var(--text2,#b8b8c0);font-size:14px;font-weight:700;line-height:1;overflow:hidden;user-select:none}
+.rcavatar .rcavimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;z-index:2}
+.rcavatar .rcletter{position:relative;z-index:1;font:inherit}
+.rchead{flex:1 1 auto;min-width:0}
+.rchead .rcname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcowner{font-size:12px;color:var(--text2,#b8b8c0);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* full-screen file editor */
 .sheetcard.efscreen{height:100dvh;max-height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;overflow:hidden}
 .efhead{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;flex:0 0 auto;border-bottom:1px solid var(--divider,#26262b)}
-.efhead .iconbtn{flex:0 0 auto}
 .efname{display:flex;flex-direction:column;min-width:0}
 .efname .eftitle{font-size:17px;font-weight:700;line-height:1.2}
 .efname .efsub{font-size:12px;color:var(--text2,#b8b8c0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1042,16 +1027,34 @@ body.limited #budgetChip,body.sheetopen #budgetChip{display:none}
 .efscreen .editwrap .codeln{max-height:none;overflow:hidden}
 .effoot{flex:0 0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;
   border-top:1px solid var(--divider,#26262b);background:var(--card,#121216)}
+.editwrap{display:flex;max-height:34vh;border-radius:14px;background:var(--bg);overflow:hidden;margin-top:4px}
+.editwrap .codeln{position:static;overflow:hidden;margin:0;padding:12px 8px 12px 12px;flex:0 0 auto;
+  border-right:1px solid var(--divider,#26262b);background:transparent;opacity:.7;user-select:none;-webkit-user-select:none;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:12.5px;line-height:1.6}
+.editarea{flex:1 1 auto;min-width:0;border:0;outline:0;background:transparent;resize:none;
+  padding:12px 14px;min-height:34vh;max-height:34vh;overflow:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text,#e6e6e6);
+  white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden}
+.sheethead{padding:4px 4px 8px}
 
-/* the file sheet: buttons sit close under the name, and the code gets its own
-   breathing room below them (it used to butt straight up against the buttons) */
-.fileacts{margin:0 0 12px}
-.codewrap{margin-top:0}
+/* commit composer: a short title, then an optional longer description */
+.cmdesc{min-height:64px;max-height:26vh;line-height:1.5;font-size:14px;font-family:inherit;resize:vertical}
+.fldlabel{display:block;font-size:12px;font-weight:600;color:var(--text2,#b8b8c0);margin:0 4px 6px}
+.fldlabel .dim{color:var(--text3,#6b7280);font-weight:400}
 
-/* per-row ⋯ button in the file list */
-.rowmenu{flex:0 0 auto;opacity:.65;margin-left:auto}
-.rowmenu svg{width:16px;height:16px}
-.lrow.sep{border-top:1px solid var(--divider,#26262b)}
-.fldrow{display:flex;align-items:center;gap:8px}
-.fldrow .fld{flex:1 1 auto;min-width:0}
-.fldext{flex:0 0 auto;padding:0 10px;color:var(--text2,#b8b8c0);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+/* two actions side by side, each taking half the width */
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1 1 0;min-width:0}
+
+/* full-screen file editor: code fills the screen, commit controls pinned */
+.sheetcard.efscreen{height:100dvh;max-height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.efhead{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;flex:0 0 auto;border-bottom:1px solid var(--divider,#26262b)}
+.efname{display:flex;flex-direction:column;min-width:0}
+.efname .eftitle{font-size:17px;font-weight:700;line-height:1.2}
+.efname .efsub{font-size:12px;color:var(--text2,#b8b8c0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.efscreen .editwrap{flex:1 1 auto;min-height:0;max-height:none;border-radius:0;margin:0}
+.efscreen .editarea{min-height:0;max-height:none;height:100%}
+.efscreen .editwrap .codeln{max-height:none;overflow:hidden}
+.effoot{flex:0 0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;
+  border-top:1px solid var(--divider,#26262b);background:var(--card,#121216);max-height:52vh;overflow-y:auto}
